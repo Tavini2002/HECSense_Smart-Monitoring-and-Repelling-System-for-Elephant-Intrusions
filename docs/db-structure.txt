@@ -1,0 +1,33 @@
+Admin Panel - Web-based
+Requesting App - Mobile App
+
+
+Users 
+ - ID
+ - Username
+ - Password
+ - Account Type
+
+Organs 
+ - ID
+ - Organ Name
+ - Blood Type
+ - Donor Name
+
+
+Mobile Users 
+
+- User ID
+- First Name
+- Last Name
+- DoB
+- Gender
+- Blood Type
+
+Organs Requests 
+
+ - User ID
+ - Organ ID
+ - Needed Date
+ - Blood Type
+ - Status = False

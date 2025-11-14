@@ -1,0 +1,54 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin" // Flutter Gradle Plugin
+}
+
+dependencies {
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'com.google.errorprone:error_prone_annotations:2.10.0'
+    // Other dependencies
+}
+
+
+android {
+    namespace = "com.hecsense.app"
+    compileSdk = 34 // Updated compile SDK version to the latest stable version
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    defaultConfig {
+        applicationId = "com.organ.client.app.HECSense"
+        minSdkVersion = flutter.minSdkVersion // You can set your preferred min SDK here
+        targetSdk = 34 // Updated target SDK version to match compile SDK
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    signingConfigs {
+        release {
+            keyAlias System.getenv("MY_KEY_ALIAS") ?: MY_KEY_ALIAS
+            keyPassword System.getenv("MY_KEY_PASSWORD") ?: MY_KEY_PASSWORD
+            storeFile file('C:/devtools/my-release-key.jks')
+            storePassword System.getenv("MY_STORE_PASSWORD") ?: MY_STORE_PASSWORD
+        }
+    }
+
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
