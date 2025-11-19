@@ -38,7 +38,7 @@ class DistanceActionsScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 20),
                   Text(
-                    'HEC Sense intelligently measures how close the elephants are. '
+                    'HEC Sense intelligently the measures how close the elephants are. '
                         'From gentle alerts to loud deterrents — the system reacts smartly based on the threat level.',
                     style: TextStyle(
                       fontSize: 17,
