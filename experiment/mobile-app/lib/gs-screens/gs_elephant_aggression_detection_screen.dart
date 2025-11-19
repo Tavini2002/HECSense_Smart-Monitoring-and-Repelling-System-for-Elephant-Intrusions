@@ -28,7 +28,7 @@ class AggressionDetectionScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: const [
                   Text(
-                    'Elephant Aggression Detection',
+                    'Elephant Aggressive Detection',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
