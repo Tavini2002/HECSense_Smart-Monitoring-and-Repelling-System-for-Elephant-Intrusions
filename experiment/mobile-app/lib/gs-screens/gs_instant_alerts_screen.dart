@@ -30,7 +30,7 @@ class InstantAlertsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: const [
                   Text(
-                    'Smart Alerts & Responses',
+                    'Smart Alerts && Responses',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
