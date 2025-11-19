@@ -11,7 +11,10 @@ class GetStartedScreen extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF2196F3), Color(0xFF64B5F6)], // Blue gradient
+            colors: [
+              Color(0xFF2E7D32), // Dark Green
+              Color(0xFF66BB6A), // Light Green
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -54,8 +57,8 @@ class GetStartedScreen extends StatelessWidget {
                       'AI-powered monitoring to prevent human-elephant conflicts with real-time alerts and smart sensors.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 20, // bigger text
-                        color: Colors.white, // pure white
+                        fontSize: 20,
+                        color: Colors.white,
                         fontWeight: FontWeight.w500,
                         height: 1.4,
                       ),
@@ -81,14 +84,14 @@ class GetStartedScreen extends StatelessWidget {
                       width: 300,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: Colors.red, // Changed to red
+                        color: Colors.red, // Red button
                         borderRadius: BorderRadius.circular(25),
                       ),
                       alignment: Alignment.center,
                       child: const Text(
                         'Get Started',
                         style: TextStyle(
-                          color: Colors.white, // white text on red button
+                          color: Colors.white, // White text on red button
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -104,3 +107,4 @@ class GetStartedScreen extends StatelessWidget {
     );
   }
 }
+
