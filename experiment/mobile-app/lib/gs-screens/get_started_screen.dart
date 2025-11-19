@@ -26,7 +26,7 @@ class GetStartedScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 40.0),
                 child: Center(
                   child: Text(
-                    'Welcome to HEC-Sense',
+                    'Welcome to HECSense',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
