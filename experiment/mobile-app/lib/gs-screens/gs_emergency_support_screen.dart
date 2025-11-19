@@ -39,7 +39,7 @@ class EmergencyMedicalSupportScreen extends StatelessWidget {
                   Text(
                     'When an elephant is injured, the app instantly connects rescuers and vets. AI guidance suggests first-aid steps to stabilize the animal until help arrives.',
                     style: TextStyle(
-                      fontSize: 17,
+                      fontSize: 18,
                       color: Colors.white, // White paragraph text
                       height: 1.5,
                     ),
