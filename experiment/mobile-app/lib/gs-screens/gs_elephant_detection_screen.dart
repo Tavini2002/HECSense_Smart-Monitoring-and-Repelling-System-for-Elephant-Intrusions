@@ -7,9 +7,9 @@ class DetectionElephantScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF2196F3), // Blue background
+      backgroundColor: const Color(0xFF129166), // Green background
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2196F3),
+        backgroundColor: const Color(0xFF129166),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -42,7 +42,7 @@ class DetectionElephantScreen extends StatelessWidget {
                     'Detect elephants in real-time using smart cameras and sensors. The system analyzes movement and predicts aggressive actions early to ensure safety.',
                     style: TextStyle(
                       fontSize: 17,
-                      color: Colors.white, // White text for contrast
+                      color: Colors.white, // White text
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,
@@ -56,7 +56,7 @@ class DetectionElephantScreen extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: Image.asset(
-                    'assets/images/elephant_detection.png', // Replace with your actual image
+                    'assets/images/elephant_detection.png',
                     height: 400,
                     width: 400,
                   ),
@@ -73,7 +73,8 @@ class DetectionElephantScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const InstantAlertsScreen(),
+                          builder: (context) =>
+                          const InstantAlertsScreen(),
                         ),
                       );
                     },
@@ -81,7 +82,10 @@ class DetectionElephantScreen extends StatelessWidget {
                       height: 55,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFFF3D00), Color(0xFFFF6E40)], // Red gradient
+                          colors: [
+                            Color(0xFFFF3D00),
+                            Color(0xFFFF6E40)
+                          ], // Red gradient
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
