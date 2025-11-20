@@ -1,90 +1,97 @@
-/* Main dark background */
-.app-container {
-  background: #0d0d0d;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
+/* App Wrapper */
+.app-wrapper {
   position: relative;
-  color: white;
-  font-family: Arial, sans-serif;
+  height: 100vh;
+  background: #f5f7fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
 }
 
-/* Floating Action Button (Left Bottom Corner) */
-.fab {
+/* Floating Menu Button */
+.menu-btn {
   position: absolute;
-  bottom: 24px;
-  left: 24px;
-  background: #222;
-  color: white;
+  left: 20px;
+  top: 20px;
+  background: #2c3e50;
+  color: #fff;
+  font-size: 22px;
   border: none;
-  width: 64px;
-  height: 64px;
+  padding: 14px 18px;
   border-radius: 50%;
-  font-size: 28px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.3s ease;
 }
 
-.fab:hover {
-  background: #333;
+.menu-btn:hover {
+  background: #1a252f;
 }
 
-/* Slide Panel on Left */
-.panel {
-  position: absolute;
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  left: -300px;
   top: 0;
-  bottom: 0;
-  left: -260px; /* hidden */
   width: 260px;
-  background: #1a1a1a;
+  height: 100vh;
+  background: #ffffff;
+  box-shadow: 3px 0 10px rgba(0,0,0,0.15);
   padding: 20px;
-  transition: left 0.35s ease;
-  border-right: 2px solid #111;
+  transition: left 0.4s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-.panel.show {
-  left: 0; /* visible */
+.sidebar.open {
+  left: 0;
 }
 
 /* Close Button */
 .close-btn {
-  background: transparent;
-  color: #aaa;
+  align-self: flex-end;
+  background: none;
   border: none;
-  font-size: 28px;
-  float: right;
+  font-size: 26px;
   cursor: pointer;
-  margin-bottom: 10px;
-}
-
-.close-btn:hover {
-  color: white;
+  margin-bottom: 15px;
 }
 
 /* Tabs */
-.tabs {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
-}
-
 .tabs button {
-  background: #333;
-  color: #ccc;
-  padding: 12px;
-  border-radius: 10px;
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 10px;
   border: none;
+  border-radius: 8px;
+  background: #edf2f4;
   cursor: pointer;
+  font-size: 15px;
   text-align: left;
+  transition: 0.2s;
 }
 
-.tabs .active {
-  background: #555;
+.tabs button.active {
+  background: #2d6cdf;
   color: white;
 }
 
-.tab-content {
+.tabs button:hover {
+  background: #dce0e3;
+}
+
+/* Content */
+.content {
   margin-top: 20px;
-  opacity: 0.9;
+}
+
+.box {
+  padding: 15px;
+  background: #f7f9fc;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.box h2 {
+  margin-top: 0;
 }

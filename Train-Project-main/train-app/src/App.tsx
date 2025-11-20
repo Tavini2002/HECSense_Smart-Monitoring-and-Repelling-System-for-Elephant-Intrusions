@@ -6,19 +6,19 @@ export default function App() {
   const [tab, setTab] = useState("train");
 
   return (
-    <div className="app-container">
+    <div className="app-wrapper">
 
-      {/* Floating Circular Button (Left Side) */}
-      <button className="fab" onClick={() => setOpen(true)}>
-        ≡
+      {/* Floating Menu Button */}
+      <button className="menu-btn" onClick={() => setOpen(true)}>
+        ☰
       </button>
 
-      {/* Left Slide Panel */}
-      <div className={`panel ${open ? "show" : ""}`}>
-
-        {/* Close Button */}
+      {/* Sidebar */}
+      <div className={`sidebar ${open ? "open" : ""}`}>
+        
+        {/* Close button */}
         <button className="close-btn" onClick={() => setOpen(false)}>
-          ×
+          ✕
         </button>
 
         {/* Tabs */}
@@ -27,24 +27,36 @@ export default function App() {
             className={tab === "train" ? "active" : ""}
             onClick={() => setTab("train")}
           >
-            Train Location
+            🚆 Train Location
           </button>
 
           <button
             className={tab === "notif" ? "active" : ""}
             onClick={() => setTab("notif")}
           >
-            Notifications
+            🔔 Notifications
           </button>
         </div>
 
         {/* Tab Content */}
-        <div className="tab-content">
-          {tab === "train" && <p>Train location details will appear here.</p>}
-          {tab === "notif" && <p>No new notifications.</p>}
+        <div className="content">
+          {tab === "train" && (
+            <div className="box">
+              <h2>Train Location</h2>
+              <p>Train location details will appear here.</p>
+            </div>
+          )}
+
+          {tab === "notif" && (
+            <div className="box">
+              <h2>Notifications</h2>
+              <p>No new notifications.</p>
+            </div>
+          )}
         </div>
 
       </div>
+
     </div>
   );
 }
