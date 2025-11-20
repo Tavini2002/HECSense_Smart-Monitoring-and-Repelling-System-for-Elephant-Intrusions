@@ -28,7 +28,7 @@ class DistanceActionsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: const [
                   Text(
-                    'Adaptive Response by Distance',
+                    'Adaptive Responses by Distance',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
