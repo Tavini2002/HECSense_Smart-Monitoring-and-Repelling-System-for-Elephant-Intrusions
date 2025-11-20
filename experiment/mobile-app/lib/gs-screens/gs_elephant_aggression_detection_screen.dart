@@ -8,12 +8,12 @@ class AggressionDetectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.blue, // 🔵 Background changed to blue
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.blue, // Match app bar with background
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -32,16 +32,18 @@ class AggressionDetectionScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF129166),
+                      color: Colors.white, // Change text color for blue background
                     ),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'Detect early signs of aggressive behavior using AI. The system analyzes posture, speed, trunk and ear movement to predict risk and trigger timely responses.',
+                    'Detect early signs of aggressive behavior using AI. '
+                        'The system analyzes posture, speed, trunk and ear movement '
+                        'to predict risk and trigger timely responses.',
                     style: TextStyle(
                       fontSize: 17,
-                      color: Colors.black87,
+                      color: Colors.white, // Change text color for visibility
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,
@@ -49,7 +51,7 @@ class AggressionDetectionScreen extends StatelessWidget {
                 ],
               ),
 
-              // Illustration (transparent vector)
+              // Illustration
               Expanded(
                 child: Center(
                   child: Image.asset(
@@ -61,7 +63,7 @@ class AggressionDetectionScreen extends StatelessWidget {
                 ),
               ),
 
-              // Next
+              // Next Button (Red)
               SizedBox(
                 width: double.infinity,
                 child: GestureDetector(
@@ -74,11 +76,7 @@ class AggressionDetectionScreen extends StatelessWidget {
                   child: Container(
                     height: 55,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF129166), Color(0xFF7FD188)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
+                      color: Colors.red, // 🔴 Red button
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.center,
@@ -93,6 +91,7 @@ class AggressionDetectionScreen extends StatelessWidget {
                   ),
                 ),
               ),
+
               const SizedBox(height: 12),
             ],
           ),
@@ -112,8 +111,13 @@ class _Bullet extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('•  ', style: TextStyle(fontSize: 18, height: 1.25)),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 15.5, color: Colors.black87))),
+          const Text('•  ', style: TextStyle(fontSize: 18, height: 1.25, color: Colors.white)),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 15.5, color: Colors.white),
+            ),
+          ),
         ],
       ),
     );
@@ -130,7 +134,7 @@ class _LegendDot extends StatelessWidget {
       children: [
         Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontSize: 13, color: Colors.black87)),
+        Text(label, style: const TextStyle(fontSize: 13, color: Colors.white)),
       ],
     );
   }
