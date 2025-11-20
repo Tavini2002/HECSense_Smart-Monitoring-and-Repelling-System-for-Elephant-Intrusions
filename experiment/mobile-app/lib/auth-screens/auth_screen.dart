@@ -75,7 +75,7 @@ class HomeScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40.0),
                   child: SizedBox(
-                    width: 250, // Set fixed width for the button
+                    width: 251, // Set fixed width for the button
                     child: ElevatedButton(
                       onPressed: () {
                         // Navigate to CreateAccountScreen
