@@ -8,12 +8,12 @@ class InstantAlertsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Keep white background
+      backgroundColor: Colors.blue, // 🔵 Background changed to blue
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.blue, // Match app bar color
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -34,7 +34,7 @@ class InstantAlertsScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF129166), // Green heading
+                      color: Colors.white, // White heading on blue
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -43,7 +43,7 @@ class InstantAlertsScreen extends StatelessWidget {
                     'Get instant alerts on your phone when elephants are nearby. The system automatically plays warning sounds and triggers deterrent actions to keep everyone safe.',
                     style: TextStyle(
                       fontSize: 17,
-                      color: Colors.black87,
+                      color: Colors.white, // White text on blue
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,
@@ -57,14 +57,14 @@ class InstantAlertsScreen extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: Image.asset(
-                    'assets/images/instant_alerts.png', // Replace with your actual image
+                    'assets/images/instant_alerts.png',
                     height: 400,
                     width: 400,
                   ),
                 ),
               ),
 
-              // Gradient Button
+              // Red Button
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: SizedBox(
@@ -81,11 +81,7 @@ class InstantAlertsScreen extends StatelessWidget {
                     child: Container(
                       height: 55,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF129166), Color(0xFF7FD188)],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
+                        color: Colors.red, // 🔴 Solid red button
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
