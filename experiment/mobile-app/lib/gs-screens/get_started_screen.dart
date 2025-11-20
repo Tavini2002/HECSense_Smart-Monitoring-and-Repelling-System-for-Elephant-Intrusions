@@ -7,13 +7,13 @@ class GetStartedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Gradient background
+      // Blue Gradient background
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF2E7D32), // Dark Green
-              Color(0xFF66BB6A), // Light Green
+              Color(0xFF1976D2), // Deep Blue
+              Color(0xFF64B5F6), // Light Blue
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -40,7 +40,7 @@ class GetStartedScreen extends StatelessWidget {
                 ),
               ),
 
-              // Center image
+              // Center image and description
               Column(
                 children: [
                   Center(
@@ -67,7 +67,7 @@ class GetStartedScreen extends StatelessWidget {
                 ],
               ),
 
-              // Button at the bottom
+              // Red Button at the bottom
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: Center(
@@ -91,7 +91,7 @@ class GetStartedScreen extends StatelessWidget {
                       child: const Text(
                         'Get Started',
                         style: TextStyle(
-                          color: Colors.white, // White text on red button
+                          color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -107,4 +107,3 @@ class GetStartedScreen extends StatelessWidget {
     );
   }
 }
-
