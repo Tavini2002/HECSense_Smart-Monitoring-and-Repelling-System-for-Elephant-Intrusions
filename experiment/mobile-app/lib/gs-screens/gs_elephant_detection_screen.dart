@@ -7,9 +7,9 @@ class DetectionElephantScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF129166), // Green background
+      backgroundColor: Colors.blue, // 🔵 Background changed to blue
       appBar: AppBar(
-        backgroundColor: const Color(0xFF129166),
+        backgroundColor: Colors.blue, // Match app bar color
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -39,7 +39,8 @@ class DetectionElephantScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 20),
                   Text(
-                    'Detect elephants in real-time using smart cameras and sensors. The system analyzes movement and predicts aggressive actions early to ensure safety.',
+                    'Detect elephants in real-time using smart cameras and sensors. '
+                        'The system analyzes movement and predicts aggressive actions early to ensure safety.',
                     style: TextStyle(
                       fontSize: 17,
                       color: Colors.white, // White text
@@ -63,7 +64,7 @@ class DetectionElephantScreen extends StatelessWidget {
                 ),
               ),
 
-              // Red Gradient Button
+              // Red Button
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: SizedBox(
@@ -73,22 +74,14 @@ class DetectionElephantScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                          const InstantAlertsScreen(),
+                          builder: (context) => const InstantAlertsScreen(),
                         ),
                       );
                     },
                     child: Container(
                       height: 55,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFFFF3D00),
-                            Color(0xFFFF6E40)
-                          ], // Red gradient
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
+                        color: Colors.red, // 🔴 Solid red button
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
