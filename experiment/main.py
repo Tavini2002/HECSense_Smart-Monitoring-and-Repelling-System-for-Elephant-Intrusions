@@ -226,10 +226,15 @@ with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)",
                }
                """) as demo:
   
+    # ------------------------
+    # Styled Markdown / Header
+    # ------------------------
     gr.Markdown("""
-    # 🐘 HEC-Sense AI System
-    Upload a video, enable alarm if desired, and start detection.  
-    Use **Stop** to immediately stop both detection and sound.
+    <div style="text-align:center; padding:20px; background: linear-gradient(90deg, #ff6a00, #ee0979); 
+                border-radius:12px; box-shadow:0 0 15px rgba(0,0,0,0.5);">
+        <h1 style="color:white; font-family:Verdana, sans-serif; margin:0;">🐘 HEC-Sense AI System</h1>
+        <p style="color:#f0f0f0; font-size:16px; margin-top:5px;">Upload a video and enable alarm detection. Click Start to run detection, Stop to immediately halt it.</p>
+    </div>
     """)
 
     with gr.Row():
