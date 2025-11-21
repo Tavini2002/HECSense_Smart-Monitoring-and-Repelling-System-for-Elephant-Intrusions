@@ -107,7 +107,7 @@ def stream_processed_frames(video_file, conf, alarm_on, alarm_choice, alarm_volu
     if not cap.isOpened():
         raise gr.Error("Could not open the selected video.")
 
-    red = (0, 0, 255)
+    highlight_color = (0, 255, 255)
     sound_path = _resolve_sound_path(alarm_choice)
 
     try:
@@ -130,9 +130,9 @@ def stream_processed_frames(video_file, conf, alarm_on, alarm_choice, alarm_volu
                     continue
                 x1, y1, x2, y2 = map(int, b.xyxy[0].tolist())
                 conf_val = float(b.conf.item()) if b.conf is not None else 0.0
-                cv2.rectangle(frame, (x1, y1), (x2, y2), red, 2)
+                cv2.rectangle(frame, (x1, y1), (x2, y2), highlight_color, 2)
                 cv2.putText(frame, f"Elephant {conf_val:.2f}", (x1, max(20, y1 - 10)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, red, 2, cv2.LINE_AA)
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, highlight_color, 2, cv2.LINE_AA)
 
             yield frame[:, :, ::-1]
     finally:
@@ -145,98 +145,94 @@ def stream_processed_frames(video_file, conf, alarm_on, alarm_choice, alarm_volu
 with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)", 
                css="""
                body, .gradio-container {
-                   background-color: #001f3f !important;  /* Dark blue */
-                   color: white;
+                   background-color: #0f0c29 !important;
+                   background: linear-gradient(135deg, #0f0c29, #302b63, #24243e) !important;
+                   color: #f0f0f0;
+                   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                }
 
                /* Buttons */
                .gr-button.primary {
-                   background-color: #007bff !important;
+                   background: linear-gradient(135deg, #ff7e5f, #feb47b) !important;
                    color: white !important;
-                   box-shadow: 0 0 10px #007bff;
+                   font-weight: bold;
+                   border-radius: 14px;
+                   box-shadow: 0 0 12px rgba(255,126,95,0.6);
                    transition: all 0.3s ease;
                }
                .gr-button.primary:hover {
-                   box-shadow: 0 0 20px #007bff;
+                   box-shadow: 0 0 28px rgba(255,126,95,0.9);
+                   transform: scale(1.05);
                }
+
                .gr-button.stop {
-                   background-color: #ff4500 !important;
+                   background: linear-gradient(135deg, #ff4b1f, #ff9068) !important;
                    color: white !important;
-                   box-shadow: 0 0 10px #ff4500;
+                   font-weight: bold;
+                   border-radius: 14px;
+                   box-shadow: 0 0 12px rgba(255,75,31,0.6);
                    transition: all 0.3s ease;
                }
                .gr-button.stop:hover {
-                   box-shadow: 0 0 20px #ff4500;
+                   box-shadow: 0 0 28px rgba(255,75,31,0.9);
+                   transform: scale(1.05);
                }
 
-               /* Sliders with glowing thumb */
+               /* Sliders */
                .gr-slider input[type="range"] {
                    -webkit-appearance: none;
                    width: 100%;
-                   height: 8px;
-                   background: #003366;  /* inactive track */
-                   border-radius: 4px;
+                   height: 10px;
+                   background: linear-gradient(90deg, #ff7e5f, #feb47b);
+                   border-radius: 6px;
                }
-
                .gr-slider input[type="range"]::-webkit-slider-thumb {
                    -webkit-appearance: none;
-                   width: 18px;
-                   height: 18px;
-                   background: #28a745; /* thumb color */
+                   width: 20px;
+                   height: 20px;
+                   background: #fff;
                    border-radius: 50%;
-                   cursor: pointer;
                    border: none;
-                   box-shadow: 0 0 8px #28a745; /* subtle glow */
+                   cursor: pointer;
+                   box-shadow: 0 0 12px #ff7e5f;
                    transition: box-shadow 0.3s ease;
                }
                .gr-slider input[type="range"]::-webkit-slider-thumb:hover {
-                   box-shadow: 0 0 16px #28a745; /* stronger glow on hover */
+                   box-shadow: 0 0 24px #ff7e5f;
                }
-
-               .gr-slider input[type="range"]::-moz-range-thumb {
-                   width: 18px;
-                   height: 18px;
-                   background: #28a745;
-                   border-radius: 50%;
-                   border: none;
-                   cursor: pointer;
-                   box-shadow: 0 0 8px #28a745;
-                   transition: box-shadow 0.3s ease;
-               }
-               .gr-slider input[type="range"]::-moz-range-thumb:hover {
-                   box-shadow: 0 0 16px #28a745;
-               }
-
-               .gr-slider input[type="range"]::-ms-thumb {
-                   width: 18px;
-                   height: 18px;
-                   background: #28a745;
-                   border-radius: 50%;
-                   border: none;
-                   cursor: pointer;
-                   box-shadow: 0 0 8px #28a745;
-                   transition: box-shadow 0.3s ease;
-               }
-               .gr-slider input[type="range"]::-ms-thumb:hover {
-                   box-shadow: 0 0 16px #28a745;
-               }
-
                .gr-slider > label {
-                   color: white !important;
+                   color: #f0f0f0 !important;
+               }
+
+               /* Dropdowns */
+               .gr-dropdown {
+                   background: linear-gradient(135deg, #434343, #000000);
+                   color: #f0f0f0 !important;
+                   border-radius: 12px;
+                   padding: 5px;
+               }
+               .gr-dropdown select {
+                   background: transparent;
+                   color: #f0f0f0 !important;
                }
                """) as demo:
-  
+
     # ------------------------
-    # Styled Markdown / Header
+    # Modern Gradient Header
     # ------------------------
     gr.Markdown("""
-    <div style="text-align:center; padding:20px; background: linear-gradient(90deg, #ff6a00, #ee0979); 
-                border-radius:12px; box-shadow:0 0 15px rgba(0,0,0,0.5);">
-        <h1 style="color:white; font-family:Verdana, sans-serif; margin:0;">🐘 HEC-Sense AI System</h1>
-        <p style="color:#f0f0f0; font-size:16px; margin-top:5px;">Upload a video and enable alarm detection. Click Start to run detection, Stop to immediately halt it.</p>
+    <div style="text-align:center; padding:25px; background: linear-gradient(135deg, #ff7e5f, #feb47b);
+                border-radius:16px; box-shadow:0 0 20px rgba(0,0,0,0.4);">
+        <h1 style="color:white; font-family: 'Verdana', sans-serif; margin:0;">🐘 HEC-Sense AI System</h1>
+        <p style="color:#f9f9f9; font-size:16px; margin-top:8px;">
+            Upload your video and enable alarm detection. Start detection and stop anytime to halt the process.
+        </p>
     </div>
     """)
 
+    # ------------------------
+    # Inputs
+    # ------------------------
     with gr.Row():
         file_in = gr.File(label="Choose Video", file_types=["video"], file_count="single")
         conf = gr.Slider(0.05, 0.95, value=0.35, step=0.05, label="Confidence")
@@ -250,8 +246,14 @@ with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)",
         )
         alarm_volume = gr.Slider(0.0, 1.0, value=0.9, step=0.05, label="Alarm Volume")
 
+    # ------------------------
+    # Output
+    # ------------------------
     live_out = gr.Image(label="Live Output", streaming=True, height=480)
 
+    # ------------------------
+    # Buttons
+    # ------------------------
     with gr.Row():
         start_btn = gr.Button("🚀 Start Detection", variant="primary")
         stop_btn = gr.Button("🛑 Stop", variant="stop")
@@ -259,7 +261,6 @@ with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)",
     start_btn.click(fn=stream_processed_frames,
                     inputs=[file_in, conf, alarm_on, alarm_choice, alarm_volume],
                     outputs=live_out)
-
     stop_btn.click(fn=lambda: _stop_process(), inputs=[], outputs=[])
 
 if __name__ == "__main__":
