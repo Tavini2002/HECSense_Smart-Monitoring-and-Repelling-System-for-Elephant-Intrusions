@@ -1,3 +1,4 @@
+
 import os
 import time
 import cv2
@@ -5,7 +6,7 @@ import threading
 import gradio as gr
 from ultralytics import YOLO
 
-# Use pygame for controllable audio
+# Use pygame for controllable audio (playsound can't be force-stopped while playing)
 import pygame
 
 # ----------------------------
@@ -27,10 +28,10 @@ _model = None
 _elephant_id = None
 _process_stop = threading.Event()
 
+# Audio state
 _audio_initialized = False
 _alarm_playing = False
 _current_sound_path = None
-
 
 # ----------------------------
 # Utilities
@@ -39,29 +40,26 @@ def _init_audio():
     global _audio_initialized
     if _audio_initialized:
         return
+    # Initialize pygame mixer once. Use common settings to avoid glitches.
     try:
         pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
     except Exception:
+        # Retry with defaults if the above fails
         pygame.mixer.init()
     _audio_initialized = True
-
 
 def _load_model():
     global _model, _elephant_id
     if _model is None:
         _model = YOLO(DEFAULT_MODEL_PATH)
-        names = getattr(_model, "names", None) or getattr(
-            _model.model, "names", None)
-
+        names = getattr(_model, "names", None) or getattr(_model.model, "names", None)
         if isinstance(names, dict):
-            _elephant_id = [k for k, v in names.items()
-                            if v == "elephant"][0]
+            _elephant_id = [k for k, v in names.items() if v == "elephant"][0]
         elif isinstance(names, list):
             _elephant_id = names.index("elephant")
         else:
             raise gr.Error("Could not find 'elephant' class in model.")
     return _model, int(_elephant_id)
-
 
 def _resolve_sound_path(choice: str):
     fname = SOUND_FILES.get(choice)
@@ -70,24 +68,23 @@ def _resolve_sound_path(choice: str):
     p = os.path.join(ALARM_BASE_DIR, fname)
     return p if os.path.exists(p) else None
 
-
 def _start_alarm(sound_path: str, volume: float = 1.0):
+    """Start/loop alarm immediately (non-blocking)."""
     global _alarm_playing, _current_sound_path
     _init_audio()
-
+    # If a different sound is requested or not playing, (re)load & play
     if (not _alarm_playing) or (_current_sound_path != sound_path):
         try:
             pygame.mixer.music.load(sound_path)
-            pygame.mixer.music.set_volume(
-                max(0.0, min(1.0, volume)))
-            pygame.mixer.music.play(loops=-1)
+            pygame.mixer.music.set_volume(max(0.0, min(1.0, volume)))
+            pygame.mixer.music.play(loops=-1)  # loop indefinitely
             _alarm_playing = True
             _current_sound_path = sound_path
         except Exception as e:
             print(f"[Alarm] Failed to play '{sound_path}': {e}")
 
-
 def _stop_alarm():
+    """Stop alarm immediately."""
     global _alarm_playing
     if not _audio_initialized:
         return
@@ -97,11 +94,10 @@ def _stop_alarm():
         pass
     _alarm_playing = False
 
-
 def _stop_process():
+    """Signal to stop video processing and alarm."""
     _process_stop.set()
     _stop_alarm()
-
 
 # ----------------------------
 # Main Stream Function
@@ -112,15 +108,12 @@ def stream_processed_frames(video_file, conf, alarm_on, alarm_choice, alarm_volu
 
     if video_file is None:
         raise gr.Error("Please upload or select a video.")
-
     video_path = video_file if isinstance(video_file, str) else video_file.get("path", None)
-
     if not video_path or not os.path.exists(video_path):
         raise gr.Error("Invalid video file path.")
 
     model, elephant_id = _load_model()
     cap = cv2.VideoCapture(video_path)
-
     if not cap.isOpened():
         raise gr.Error("Could not open the selected video.")
 
@@ -135,24 +128,22 @@ def stream_processed_frames(video_file, conf, alarm_on, alarm_choice, alarm_volu
 
             results = model.predict(frame, conf=conf, verbose=False)
             res = results[0]
-
             detected = any(int(b.cls.item()) == elephant_id for b in res.boxes)
 
+            # Handle alarm logic with immediate stop/play
             if alarm_on and detected and sound_path:
                 _start_alarm(sound_path, volume=alarm_volume)
             else:
                 _stop_alarm()
 
+            # Draw bounding boxes
             for b in res.boxes:
                 if int(b.cls.item()) != elephant_id:
                     continue
-
                 x1, y1, x2, y2 = map(int, b.xyxy[0].tolist())
                 conf_val = float(b.conf.item()) if b.conf is not None else 0.0
-
                 cv2.rectangle(frame, (x1, y1), (x2, y2), red, 2)
-                cv2.putText(frame, f"Elephant {conf_val:.2f}",
-                            (x1, max(20, y1 - 10)),
+                cv2.putText(frame, f"Elephant {conf_val:.2f}", (x1, max(20, y1 - 10)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, red, 2, cv2.LINE_AA)
 
             yield frame[:, :, ::-1]
@@ -160,55 +151,14 @@ def stream_processed_frames(video_file, conf, alarm_on, alarm_choice, alarm_volu
         cap.release()
         _stop_alarm()
 
-
-# ----------------------------
-# Custom CSS (Dark Gradient + Glow Buttons)
-# ----------------------------
-CUSTOM_CSS = """
-/* Dark gradient background */
-body, .gradio-container {
-    background: linear-gradient(135deg, #000000, #0a1a3a, #3a0066) !important;
-    color: white !important;
-}
-
-/* Glow button general style */
-button {
-    background-color: #0059ff !important;
-    color: white !important;
-    border-radius: 10px !important;
-    font-weight: bold !important;
-    padding: 10px 18px !important;
-    border: none !important;
-
-    box-shadow: 0 0 10px #337bff, 0 0 20px #1b50ff, 0 0 40px #0037ff;
-    transition: 0.3s ease-in-out;
-}
-
-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px #5b9aff, 0 0 30px #3f6fff, 0 0 45px #002aff;
-}
-
-/* STOP button (red glow) */
-button.stop {
-    background-color: #ff1a1a !important;
-    box-shadow: 0 0 10px #ff4d4d, 0 0 25px #ff1a1a, 0 0 40px #cc0000;
-}
-
-button.stop:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px #ff6666, 0 0 35px #ff3333, 0 0 50px #b30000;
-}
-"""
-
-
 # ----------------------------
 # Gradio UI
 # ----------------------------
-with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)", css=CUSTOM_CSS) as demo:
+with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)") as demo:
     gr.Markdown("""
-    # 🐘 HEC-Sense AI Module  
+    # 🐘 HEC-Sense AI System
     Upload a video, enable alarm if desired, and start detection.  
+    Use **Stop** to immediately stop both detection and sound.
     """)
 
     with gr.Row():
@@ -228,14 +178,13 @@ with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)", css=CUSTO
 
     with gr.Row():
         start_btn = gr.Button("🚀 Start Detection", variant="primary")
-        stop_btn = gr.Button("🛑 Stop", variant="stop", elem_classes="stop")
+        stop_btn = gr.Button("🛑 Stop", variant="stop")
 
     start_btn.click(fn=stream_processed_frames,
                     inputs=[file_in, conf, alarm_on, alarm_choice, alarm_volume],
                     outputs=live_out)
 
     stop_btn.click(fn=lambda: _stop_process(), inputs=[], outputs=[])
-
 
 if __name__ == "__main__":
     demo.launch()
