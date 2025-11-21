@@ -151,10 +151,20 @@ with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)",
                .gr-button.primary {
                    background-color: #007bff !important;
                    color: white !important;
+                   box-shadow: 0 0 10px #007bff;
+                   transition: all 0.3s ease;
+               }
+               .gr-button.primary:hover {
+                   box-shadow: 0 0 20px #007bff;
                }
                .gr-button.danger {
-                   background-color: #dc3545 !important;
+                   background-color: #ff4500 !important;  /* brighter orange-red */
                    color: white !important;
+                   box-shadow: 0 0 10px #ff4500;
+                   transition: all 0.3s ease;
+               }
+               .gr-button.danger:hover {
+                   box-shadow: 0 0 20px #ff4500;
                }
                """) as demo:
     
@@ -181,7 +191,7 @@ with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)",
 
     with gr.Row():
         start_btn = gr.Button("🚀 Start Detection", variant="primary")
-        stop_btn = gr.Button("🛑 Stop", variant="danger")
+        stop_btn = gr.Button("🛑 Stop", variant="stop")
 
     start_btn.click(fn=stream_processed_frames,
                     inputs=[file_in, conf, alarm_on, alarm_choice, alarm_volume],
