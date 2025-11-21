@@ -1,12 +1,9 @@
-
 import os
 import time
 import cv2
 import threading
 import gradio as gr
 from ultralytics import YOLO
-
-# Use pygame for controllable audio (playsound can't be force-stopped while playing)
 import pygame
 
 # ----------------------------
@@ -28,7 +25,6 @@ _model = None
 _elephant_id = None
 _process_stop = threading.Event()
 
-# Audio state
 _audio_initialized = False
 _alarm_playing = False
 _current_sound_path = None
@@ -40,11 +36,9 @@ def _init_audio():
     global _audio_initialized
     if _audio_initialized:
         return
-    # Initialize pygame mixer once. Use common settings to avoid glitches.
     try:
         pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
     except Exception:
-        # Retry with defaults if the above fails
         pygame.mixer.init()
     _audio_initialized = True
 
@@ -69,22 +63,19 @@ def _resolve_sound_path(choice: str):
     return p if os.path.exists(p) else None
 
 def _start_alarm(sound_path: str, volume: float = 1.0):
-    """Start/loop alarm immediately (non-blocking)."""
     global _alarm_playing, _current_sound_path
     _init_audio()
-    # If a different sound is requested or not playing, (re)load & play
     if (not _alarm_playing) or (_current_sound_path != sound_path):
         try:
             pygame.mixer.music.load(sound_path)
             pygame.mixer.music.set_volume(max(0.0, min(1.0, volume)))
-            pygame.mixer.music.play(loops=-1)  # loop indefinitely
+            pygame.mixer.music.play(loops=-1)
             _alarm_playing = True
             _current_sound_path = sound_path
         except Exception as e:
             print(f"[Alarm] Failed to play '{sound_path}': {e}")
 
 def _stop_alarm():
-    """Stop alarm immediately."""
     global _alarm_playing
     if not _audio_initialized:
         return
@@ -95,7 +86,6 @@ def _stop_alarm():
     _alarm_playing = False
 
 def _stop_process():
-    """Signal to stop video processing and alarm."""
     _process_stop.set()
     _stop_alarm()
 
@@ -130,13 +120,11 @@ def stream_processed_frames(video_file, conf, alarm_on, alarm_choice, alarm_volu
             res = results[0]
             detected = any(int(b.cls.item()) == elephant_id for b in res.boxes)
 
-            # Handle alarm logic with immediate stop/play
             if alarm_on and detected and sound_path:
                 _start_alarm(sound_path, volume=alarm_volume)
             else:
                 _stop_alarm()
 
-            # Draw bounding boxes
             for b in res.boxes:
                 if int(b.cls.item()) != elephant_id:
                     continue
@@ -154,7 +142,22 @@ def stream_processed_frames(video_file, conf, alarm_on, alarm_choice, alarm_volu
 # ----------------------------
 # Gradio UI
 # ----------------------------
-with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)") as demo:
+with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)", 
+               css="""
+               body, .gradio-container {
+                   background-color: #001f3f !important;  /* Dark blue */
+                   color: white;
+               }
+               .gr-button.primary {
+                   background-color: #007bff !important;
+                   color: white !important;
+               }
+               .gr-button.danger {
+                   background-color: #dc3545 !important;
+                   color: white !important;
+               }
+               """) as demo:
+    
     gr.Markdown("""
     # 🐘 HEC-Sense AI System
     Upload a video, enable alarm if desired, and start detection.  
@@ -178,7 +181,7 @@ with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)") as demo:
 
     with gr.Row():
         start_btn = gr.Button("🚀 Start Detection", variant="primary")
-        stop_btn = gr.Button("🛑 Stop", variant="stop")
+        stop_btn = gr.Button("🛑 Stop", variant="danger")
 
     start_btn.click(fn=stream_processed_frames,
                     inputs=[file_in, conf, alarm_on, alarm_choice, alarm_volume],
