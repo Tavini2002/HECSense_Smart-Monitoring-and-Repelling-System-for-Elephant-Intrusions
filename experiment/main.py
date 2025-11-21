@@ -148,6 +148,8 @@ with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)",
                    background-color: #001f3f !important;  /* Dark blue */
                    color: white;
                }
+
+               /* Buttons */
                .gr-button.primary {
                    background-color: #007bff !important;
                    color: white !important;
@@ -157,17 +159,73 @@ with gr.Blocks(title="Real-time Elephant Detection (Stoppable Alarm)",
                .gr-button.primary:hover {
                    box-shadow: 0 0 20px #007bff;
                }
-               .gr-button.danger {
-                   background-color: #ff4500 !important;  /* brighter orange-red */
+               .gr-button.stop {
+                   background-color: #ff4500 !important;
                    color: white !important;
                    box-shadow: 0 0 10px #ff4500;
                    transition: all 0.3s ease;
                }
-               .gr-button.danger:hover {
+               .gr-button.stop:hover {
                    box-shadow: 0 0 20px #ff4500;
                }
+
+               /* Sliders with glowing thumb */
+               .gr-slider input[type="range"] {
+                   -webkit-appearance: none;
+                   width: 100%;
+                   height: 8px;
+                   background: #003366;  /* inactive track */
+                   border-radius: 4px;
+               }
+
+               .gr-slider input[type="range"]::-webkit-slider-thumb {
+                   -webkit-appearance: none;
+                   width: 18px;
+                   height: 18px;
+                   background: #28a745; /* thumb color */
+                   border-radius: 50%;
+                   cursor: pointer;
+                   border: none;
+                   box-shadow: 0 0 8px #28a745; /* subtle glow */
+                   transition: box-shadow 0.3s ease;
+               }
+               .gr-slider input[type="range"]::-webkit-slider-thumb:hover {
+                   box-shadow: 0 0 16px #28a745; /* stronger glow on hover */
+               }
+
+               .gr-slider input[type="range"]::-moz-range-thumb {
+                   width: 18px;
+                   height: 18px;
+                   background: #28a745;
+                   border-radius: 50%;
+                   border: none;
+                   cursor: pointer;
+                   box-shadow: 0 0 8px #28a745;
+                   transition: box-shadow 0.3s ease;
+               }
+               .gr-slider input[type="range"]::-moz-range-thumb:hover {
+                   box-shadow: 0 0 16px #28a745;
+               }
+
+               .gr-slider input[type="range"]::-ms-thumb {
+                   width: 18px;
+                   height: 18px;
+                   background: #28a745;
+                   border-radius: 50%;
+                   border: none;
+                   cursor: pointer;
+                   box-shadow: 0 0 8px #28a745;
+                   transition: box-shadow 0.3s ease;
+               }
+               .gr-slider input[type="range"]::-ms-thumb:hover {
+                   box-shadow: 0 0 16px #28a745;
+               }
+
+               .gr-slider > label {
+                   color: white !important;
+               }
                """) as demo:
-    
+  
     gr.Markdown("""
     # 🐘 HEC-Sense AI System
     Upload a video, enable alarm if desired, and start detection.  
