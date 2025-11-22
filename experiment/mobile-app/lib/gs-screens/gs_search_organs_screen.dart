@@ -29,7 +29,7 @@ class SearchOrgansScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Text(
-                    'Search Organs',
+                    'Search the Organs',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
