@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (responseData['status'] == 'pending') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const UserWaitlistScreen()),
+            MaterialPageRoute(builder: (context) => const ApprovalPendingView()),
           );
         } else if (responseData['status'] == 'approved') {
           // Save login status, user ID, email, and full name to secure storage
