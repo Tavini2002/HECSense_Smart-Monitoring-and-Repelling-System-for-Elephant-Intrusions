@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class UserWaitlistScreen extends StatelessWidget {
-  const UserWaitlistScreen({Key? key}) : super(key: key);
+class ApprovalPendingView extends StatelessWidget {
+  const ApprovalPendingView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,44 +11,60 @@ class UserWaitlistScreen extends StatelessWidget {
           'Pending Approval',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Color(0xFF129166),
+        backgroundColor: const Color(0xFF129166),
       ),
+
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/waitlist.png', height: 150),
-            const SizedBox(height: 20),
-            const Text(
-              'You are currently on the waitlist',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Please wait for the admin to approve your account.',
-                style: TextStyle(fontSize: 16, color: Colors.black54),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Go back to the login screen
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
-                backgroundColor: Color(0xFF129166),
-              ),
-              child: const Text(
-                'GO BACK',
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-            ),
-          ],
-        ),
+        child: _PendingContent(),
       ),
+    );
+  }
+}
+
+class _PendingContent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Image.asset(
+          'assets/images/waitlist.png',
+          height: 150,
+        ),
+
+        const SizedBox(height: 18),
+
+        const Text(
+          'You are currently on the waitlist',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        ),
+
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Text(
+            'Please wait for the admin to approve your account.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: Colors.black54),
+          ),
+        ),
+
+        const SizedBox(height: 35),
+
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF129166),
+            padding: const EdgeInsets.symmetric(horizontal: 75, vertical: 15),
+          ),
+          child: const Text(
+            'GO BACK',
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+        ),
+      ],
     );
   }
 }
