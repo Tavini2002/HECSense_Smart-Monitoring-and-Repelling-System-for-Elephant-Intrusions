@@ -3,83 +3,83 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config.dart';
-import '../auth-screens/login_screen.dart'; // Import the LoginScreen
+import '../auth-screens/login_screen.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
-  const ChangePasswordScreen({Key? key}) : super(key: key);
+  const ChangePasswordScreen({super.key});
 
   @override
-  _ChangePasswordScreenState createState() => _ChangePasswordScreenState();
+  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _oldPasswordController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  final _storage = FlutterSecureStorage();
-  String _errorMessage = '';
-  bool _isLoading = false;
 
-  Future<void> _changePassword() async {
+  final TextEditingController _currentPwdCtrl = TextEditingController();
+  final TextEditingController _newPwdCtrl = TextEditingController();
+  final TextEditingController _confirmPwdCtrl = TextEditingController();
+
+  final FlutterSecureStorage _secureStore = const FlutterSecureStorage();
+
+  String _feedbackMsg = '';
+  bool _loading = false;
+
+  Future<void> _handlePasswordUpdate() async {
     setState(() {
-      _isLoading = true;
-      _errorMessage = '';
+      _loading = true;
+      _feedbackMsg = '';
     });
 
-    String? userId = await _storage.read(key: 'userId');
+    final savedUserId = await _secureStore.read(key: 'userId');
 
-    if (userId == null) {
+    if (savedUserId == null) {
       setState(() {
-        _errorMessage = 'User ID not found. Please log in again.';
-        _isLoading = false;
+        _feedbackMsg = 'User session expired. Please login again.';
+        _loading = false;
       });
       return;
     }
 
-    final url = '${Config.baseUrl}/user/change-password/mobile';
+    final endpoint = Uri.parse('${Config.baseUrl}/user/change-password/mobile');
+
     final response = await http.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      endpoint,
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'user_id': userId,
-        'old_password': _oldPasswordController.text,
-        'new_password': _newPasswordController.text,
+        'user_id': savedUserId,
+        'old_password': _currentPwdCtrl.text,
+        'new_password': _newPwdCtrl.text,
       }),
     );
 
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() => _loading = false);
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      if (data['success'] == true) {
-        // Show success message
+      final decoded = jsonDecode(response.body);
+
+      if (decoded['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password updated successfully! Logging out...')),
+          const SnackBar(
+            content: Text('Password changed successfully! Logging out...'),
+          ),
         );
 
-        // Clear user session data and navigate to LoginScreen
-        await _storage.delete(key: 'userId');
-        await _storage.delete(key: 'isLoggedIn');
+        await _secureStore.delete(key: 'userId');
+        await _secureStore.delete(key: 'isLoggedIn');
 
-        // Navigate to the login screen and remove all previous routes
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-              (Route<dynamic> route) => false,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+              (_) => false,
         );
       } else {
         setState(() {
-          _errorMessage = data['message'] ?? 'Failed to update password';
+          _feedbackMsg = decoded['message'] ?? 'Unable to update password.';
         });
       }
     } else {
       setState(() {
-        _errorMessage = 'Failed to update password. Please try again.';
+        _feedbackMsg = 'Something went wrong. Please try again.';
       });
     }
   }
@@ -91,68 +91,61 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         title: const Text('Change Password'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(18.0),
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
-                controller: _oldPasswordController,
-                decoration: const InputDecoration(labelText: 'Old Password'),
-                obscureText: true,
-                validator: (value) => value!.isEmpty ? 'Enter old password' : null,
+              _buildPasswordField(
+                controller: _currentPwdCtrl,
+                label: 'Old Password',
+                validatorMsg: 'Enter your current password',
               ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _newPasswordController,
-                decoration: const InputDecoration(labelText: 'New Password'),
-                obscureText: true,
-                validator: (value) => value!.isEmpty ? 'Enter new password' : null,
+              const SizedBox(height: 12),
+              _buildPasswordField(
+                controller: _newPwdCtrl,
+                label: 'New Password',
+                validatorMsg: 'Enter a new password',
               ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _confirmPasswordController,
-                decoration: const InputDecoration(labelText: 'Confirm New Password'),
-                obscureText: true,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Confirm your new password';
-                  } else if (value != _newPasswordController.text) {
-                    return 'Passwords do not match';
-                  }
-                  return null;
-                },
+              const SizedBox(height: 12),
+              _buildPasswordField(
+                controller: _confirmPwdCtrl,
+                label: 'Confirm New Password',
+                validatorMsg: 'Confirm your new password',
+                confirmMatch: true,
               ),
-              const SizedBox(height: 20),
-              if (_errorMessage.isNotEmpty)
+              const SizedBox(height: 18),
+
+              if (_feedbackMsg.isNotEmpty)
                 Text(
-                  _errorMessage,
+                  _feedbackMsg,
                   style: const TextStyle(color: Colors.red),
                   textAlign: TextAlign.center,
                 ),
-              const SizedBox(height: 10),
-              _isLoading
+
+              const SizedBox(height: 14),
+
+              _loading
                   ? const CircularProgressIndicator()
                   : SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange, // Set background to orange
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    textStyle: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold, // Bold text
-                    ),
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      _changePassword();
+                      _handlePasswordUpdate();
                     }
                   },
                   child: const Text(
                     'Update Password',
-                    style: TextStyle(color: Colors.white), // White text color
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -160,6 +153,28 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String label,
+    required String validatorMsg,
+    bool confirmMatch = false,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: true,
+      decoration: InputDecoration(labelText: label),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return validatorMsg;
+        }
+        if (confirmMatch && value != _newPwdCtrl.text) {
+          return 'Passwords do not match';
+        }
+        return null;
+      },
     );
   }
 }
