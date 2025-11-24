@@ -1,93 +1,95 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../config.dart'; // kept in case you need it soon
+import '../config.dart';
 import 'profile_info.dart';
 import 'change_password.dart';
-import '../main.dart'; // for navigation after logout
+import '../main.dart';
 
-const Color customOrange = Color(0xFF129166); // HEC-Sense brand color
+/// App theme color (HEC-Sense Branding)
+const Color appPrimaryShade = Color(0xFF129166);
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
 
   @override
-  _DashboardScreenState createState() => _DashboardScreenState();
+  State<DashboardScreen> createState() => _DashboardController();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
-  final _storage = const FlutterSecureStorage();
-  int _selectedIndex = 0;
+class _DashboardController extends State<DashboardScreen> {
+  final FlutterSecureStorage _secureStore = const FlutterSecureStorage();
+  int _activeTab = 0;
 
-  static const List<String> _screenTitles = [
-    'HEC-Sense Dashboard',
-    'Detections',
-    'Alerts',
-    'Datasets',
+  static const List<String> _pageHeadings = [
+    "HEC-Sense Dashboard",
+    "Detections",
+    "Alerts",
+    "Datasets",
   ];
 
-  // Template placeholders (unique keys avoid hot-reload state issues)
-  static final List<Widget> _screens = const [
-    _ComingSoonScreen(
-      key: ValueKey('tab-dashboard'),
-      icon: Icons.dashboard_outlined,
-      title: 'Dashboard coming soon',
-      subtitle:
-      'Live stats, hotspot maps, camera status, and system health will appear here.',
+  /// Placeholder screens for not-yet-implemented pages
+  static const List<Widget> _modules = [
+    PlaceholderPanel(
+      key: ValueKey("panel-dashboard"),
+      iconData: Icons.dashboard_outlined,
+      heading: "Dashboard coming soon",
+      caption:
+      "Live metrics, heatmaps, camera activity, and overall system health will display here.",
     ),
-    _ComingSoonScreen(
-      key: ValueKey('tab-detections'),
-      icon: Icons.visibility_outlined,
-      title: 'Detections coming soon',
-      subtitle:
-      'Recent elephant detections from cameras & sensors will be listed here.',
+    PlaceholderPanel(
+      key: ValueKey("panel-detections"),
+      iconData: Icons.visibility_outlined,
+      heading: "Detections coming soon",
+      caption:
+      "A list of elephant detections captured from field cameras & IoT sensors will appear here.",
     ),
-    _ComingSoonScreen(
-      key: ValueKey('tab-alerts'),
-      icon: Icons.notifications_active_outlined,
-      title: 'Alerts coming soon',
-      subtitle:
-      'Early-warning notifications, SMS/email history, and alert rules will go here.',
+    PlaceholderPanel(
+      key: ValueKey("panel-alerts"),
+      iconData: Icons.notifications_active_outlined,
+      heading: "Alerts coming soon",
+      caption:
+      "Alert logs, SMS/email notifications, and early-warning configurations will be shown here.",
     ),
-    _ComingSoonScreen(
-      key: ValueKey('tab-datasets'),
-      icon: Icons.folder_open_outlined,
-      title: 'Datasets coming soon',
-      subtitle:
-      'Open datasets, model cards, and downloads (images, annotations, models).',
+    PlaceholderPanel(
+      key: ValueKey("panel-datasets"),
+      iconData: Icons.folder_open_outlined,
+      heading: "Datasets coming soon",
+      caption:
+      "Model data, open datasets, annotation files, and downloadable resources will be placed here.",
     ),
   ];
 
-  Future<void> _logout(BuildContext context) async {
-    await _storage.deleteAll();
+  /// Clear secure storage & navigate to main page
+  Future<void> _handleLogout() async {
+    await _secureStore.deleteAll();
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const MyApp()),
-          (route) => false,
+      MaterialPageRoute(builder: (_) => const MyApp()),
+          (_) => false,
     );
   }
 
-  void _handleMenuSelection(String choice) {
-    switch (choice) {
-      case 'Profile Info':
+  /// Handle popup menu actions
+  void _onProfileMenuTap(String option) {
+    switch (option) {
+      case "Profile Info":
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const ProfileInfoScreen()),
-        );
+            context, MaterialPageRoute(builder: (_) => const ProfileInfoScreen()));
         break;
-      case 'Change Password':
+
+      case "Change Password":
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
-        );
+            context, MaterialPageRoute(builder: (_) => const ChangePasswordScreen()));
         break;
-      case 'Logout':
-        _logout(context);
+
+      case "Logout":
+        _handleLogout();
         break;
     }
   }
 
-  void _onTabSelected(int index) {
-    setState(() => _selectedIndex = index);
+  /// Change tab
+  void _switchTab(int index) {
+    setState(() => _activeTab = index);
   }
 
   @override
@@ -95,79 +97,97 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _screenTitles[_selectedIndex],
+          _pageHeadings[_activeTab],
           style: const TextStyle(color: Colors.white),
         ),
-        backgroundColor: customOrange,
+        backgroundColor: appPrimaryShade,
         automaticallyImplyLeading: false,
         actions: [
           PopupMenuButton<String>(
-            onSelected: _handleMenuSelection,
+            onSelected: _onProfileMenuTap,
             icon: const Icon(Icons.person, color: Colors.white),
-            itemBuilder: (BuildContext context) => const [
-              PopupMenuItem<String>(value: 'Profile Info', child: Text('Profile Info')),
-              PopupMenuItem<String>(value: 'Change Password', child: Text('Change Password')),
-              PopupMenuItem<String>(value: 'Logout', child: Text('Logout')),
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: "Profile Info", child: Text("Profile Info")),
+              PopupMenuItem(value: "Change Password", child: Text("Change Password")),
+              PopupMenuItem(value: "Logout", child: Text("Logout")),
             ],
-          ),
+          )
         ],
       ),
-      body: _screens[_selectedIndex],
+
+      body: _modules[_activeTab],
+
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.visibility_outlined), label: 'Detections'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications_active_outlined), label: 'Alerts'),
-          BottomNavigationBarItem(icon: Icon(Icons.folder_open_outlined), label: 'Datasets'),
-        ],
-        currentIndex: _selectedIndex,
+        currentIndex: _activeTab,
+        onTap: _switchTab,
+        backgroundColor: appPrimaryShade,
+        type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white70,
-        backgroundColor: customOrange,
-        onTap: _onTabSelected,
-        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard_outlined), label: "Dashboard"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.visibility_outlined), label: "Detections"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.notifications_active_outlined), label: "Alerts"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.folder_open_outlined), label: "Datasets"),
+        ],
       ),
     );
   }
 }
 
-/// Simple reusable “Coming soon” placeholder for HEC-Sense
-class _ComingSoonScreen extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
+/// Generic placeholder widget for not-yet-developed screens
+class PlaceholderPanel extends StatelessWidget {
+  final String heading;
+  final String caption;
+  final IconData iconData;
 
-  const _ComingSoonScreen({
+  const PlaceholderPanel({
     Key? key,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
+    required this.heading,
+    required this.caption,
+    required this.iconData,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context).textTheme;
+    final themeText = Theme.of(context).textTheme;
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 26),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 80, color: customOrange),
-              const SizedBox(height: 16),
-              Text(title, textAlign: TextAlign.center,
-                  style: t.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
-              const SizedBox(height: 10),
-              Text(subtitle, textAlign: TextAlign.center, style: t.bodyMedium),
-              const SizedBox(height: 24),
-              OutlinedButton.icon(
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Template button tapped')),
+              Icon(iconData, size: 80, color: appPrimaryShade),
+              const SizedBox(height: 18),
+              Text(
+                heading,
+                textAlign: TextAlign.center,
+                style: themeText.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                caption,
+                textAlign: TextAlign.center,
+                style: themeText.bodyMedium,
+              ),
+              const SizedBox(height: 25),
+              OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Template button tapped")),
+                  );
+                },
                 icon: const Icon(Icons.construction),
-                label: const Text('I’ll customize this later'),
+                label: const Text("I’ll customize this later"),
               ),
             ],
           ),
