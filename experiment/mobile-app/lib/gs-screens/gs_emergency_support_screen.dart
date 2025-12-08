@@ -9,55 +9,57 @@ class EmergencyMedicalSupportScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF2196F3),
       appBar: AppBar(
-        elevation: 0,
         backgroundColor: const Color(0xFF2196F3),
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SafeArea(
+      body: const SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(22.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const _HeaderSection(),
-
-              // Illustration
-              Expanded(
-                child: Center(
-                  child: Image.asset(
-                    'assets/images/medical_support.png',
-                    height: 330,
-                    width: 330,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-
-              // Next button
-              _NextButton(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HomeScreen()),
-                ),
-              ),
-            ],
-          ),
+          padding: EdgeInsets.all(22.0),
+          child: _MainContent(),
         ),
       ),
     );
   }
 }
 
-class _HeaderSection extends StatelessWidget {
-  const _HeaderSection();
+class _MainContent extends StatelessWidget {
+  const _MainContent();
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: const [
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const _TitleDescription(),
+        const Expanded(
+          child: Center(
+            child: _MedicalIllustration(),
+          ),
+        ),
+        _ProceedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _TitleDescription extends StatelessWidget {
+  const _TitleDescription();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
         Text(
           'Elephant Injury & First Aid',
           textAlign: TextAlign.center,
@@ -67,9 +69,10 @@ class _HeaderSection extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-        SizedBox(height: 18),
+        SizedBox(height: 16),
         Text(
-          'When an elephant is injured, the app instantly connects rescuers and vets. AI guidance suggests first-aid steps to stabilize the animal until help arrives.',
+          'In case of injuries, the system links rescuers with vets immediately. '
+              'AI-based suggestions guide basic first-aid until medical teams arrive.',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 17,
@@ -83,37 +86,49 @@ class _HeaderSection extends StatelessWidget {
   }
 }
 
-class _NextButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _NextButton({required this.onTap});
+class _MedicalIllustration extends StatelessWidget {
+  const _MedicalIllustration();
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: 55,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: const LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                Color(0xFFFF3D00),
-                Color(0xFFFF6E40),
-              ],
-            ),
+    return Image.asset(
+      'assets/images/medical_support.png',
+      height: 330,
+      width: 330,
+      fit: BoxFit.contain,
+    );
+  }
+}
+
+class _ProceedButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  const _ProceedButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        height: 55,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              Color(0xFFFF3D00),
+              Color(0xFFFF6E40),
+            ],
           ),
-          alignment: Alignment.center,
-          child: const Text(
-            'Next',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          'Next',
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -121,37 +136,26 @@ class _NextButton extends StatelessWidget {
   }
 }
 
-class _InfoBullet extends StatelessWidget {
-  final String content;
-
-  const _InfoBullet(this.content, {super.key});
+class InfoLineItem extends StatelessWidget {
+  final String text;
+  const InfoLineItem({required this.text, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '•  ',
-            style: TextStyle(
-              fontSize: 18,
-              height: 1.25,
-              color: Colors.white,
-            ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '•  ',
+          style: TextStyle(fontSize: 18, color: Colors.white, height: 1.25),
+        ),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 15.5, color: Colors.white),
           ),
-          Expanded(
-            child: Text(
-              content,
-              style: const TextStyle(
-                fontSize: 15.5,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
