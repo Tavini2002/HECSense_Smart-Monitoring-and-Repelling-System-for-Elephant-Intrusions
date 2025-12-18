@@ -40,7 +40,7 @@ class InstantAlertsScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 20),
                   Text(
-                    'Get instant alerts on your phone when elephants are nearby. The system automatically plays warning sounds and triggers deterrent actions to keep everyone safe.',
+                    'Get instant alerts in your phone when elephants are nearby. The system automatically plays warning sounds and triggers deterrent actions to keep everyone safe.',
                     style: TextStyle(
                       fontSize: 17,
                       color: Colors.white, // White text on blue
