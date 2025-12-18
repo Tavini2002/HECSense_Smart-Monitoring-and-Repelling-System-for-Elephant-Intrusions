@@ -72,7 +72,7 @@ class _TitleDescription extends StatelessWidget {
         SizedBox(height: 16),
         Text(
           'In case of injuries, the system links rescuers with vets immediately. '
-              'AI-based suggestions guide basic first-aid until medical teams arrive.',
+              'AI-based suggestions guide basic first-aid until medical teams arrives.',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 17,
