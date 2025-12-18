@@ -2,17 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Message extends Model
 {
     use HasFactory;
 
-    // Specify the table name if it's not the plural form of the model name
+    /**
+     * Database table associated with the model
+     */
     protected $table = 'messages';
 
-    // Specify the fillable fields
+    /**
+     * Mass assignable attributes
+     */
     protected $fillable = [
         'user_id',
         'organ_name',
@@ -20,9 +24,12 @@ class Message extends Model
         'message',
     ];
 
-    // Define the relationship with the User model
-    public function user()
+    /**
+     * Get the mobile user related to this message
+     */
+    public function mobileUser()
     {
         return $this->belongsTo(MobileUser::class, 'user_id');
     }
 }
+
