@@ -6,7 +6,7 @@ from ultralytics import YOLO
 # ----------------------------
 MODEL_PATH = "yolov8s.pt"
 CONF_THRESHOLD = 0.35
-VIDEO_SOURCE = "input-1.mp4"
+VIDEO_SOURCE = "input-2.mp4"
 
 ELEPHANT_WIDTH_M = 6.0      # average elephant body length (meters)
 
