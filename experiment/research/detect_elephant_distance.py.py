@@ -1,9 +1,6 @@
 import cv2
 from ultralytics import YOLO
 
-# ----------------------------
-# Configuration
-# ----------------------------
 MODEL_PATH = "yolov8s.pt"
 VIDEO_SOURCE = "input-2.mp4"
 
@@ -17,23 +14,20 @@ DISPLAY_HEIGHT = 540
 BOX_COLOR = (0, 0, 255)
 TEXT_COLOR = (0, 0, 255)
 
-# ----------------------------
-# Load Model
-# ----------------------------
+
+def estimate_distance(real_width_m, focal_length, bbox_width_px):
+    if bbox_width_px <= 0:
+        return None
+    return (real_width_m * focal_length) / bbox_width_px
+
+
 model = YOLO(MODEL_PATH)
 
-elephant_id = None
-for k, v in model.names.items():
-    if v == "elephant":
-        elephant_id = k
-        break
-
+elephant_id = next((k for k, v in model.names.items() if v == "elephant"), None)
 if elephant_id is None:
     raise RuntimeError("Elephant class not found")
 
 cap = cv2.VideoCapture(VIDEO_SOURCE)
-if not cap.isOpened():
-    raise RuntimeError("Cannot open video")
 
 while True:
     ret, frame = cap.read()
@@ -50,7 +44,9 @@ while True:
         confidence = float(box.conf.item())
 
         bbox_width = max(1, x2 - x1)
-        distance = (ELEPHANT_WIDTH_M * FOCAL_LENGTH) / bbox_width
+        distance = estimate_distance(
+            ELEPHANT_WIDTH_M, FOCAL_LENGTH, bbox_width
+        )
 
         cv2.rectangle(frame, (x1, y1), (x2, y2), BOX_COLOR, 2)
         cv2.putText(
