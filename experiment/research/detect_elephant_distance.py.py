@@ -18,7 +18,7 @@ TEXT_COLOR = (0, 0, 255)
 def estimate_distance(real_width_m, focal_length, bbox_width_px):
     if bbox_width_px <= 0:
         return None
-    return (real_width_m * focal_length) / bbox_width_px
+    return round((real_width_m * focal_length) / bbox_width_px, 1)
 
 
 def draw_detection(frame, x1, y1, x2, y2, label):
@@ -31,6 +31,16 @@ def draw_detection(frame, x1, y1, x2, y2, label):
         0.6,
         TEXT_COLOR,
         2
+    )
+
+
+def resize_for_display(frame):
+    h, w = frame.shape[:2]
+    scale = min(DISPLAY_WIDTH / w, DISPLAY_HEIGHT / h)
+    return cv2.resize(
+        frame,
+        (int(w * scale), int(h * scale)),
+        interpolation=cv2.INTER_AREA
     )
 
 
@@ -59,11 +69,11 @@ while True:
             max(1, x2 - x1)
         )
 
-        label = f"Elephant {confidence:.2f} | {distance:.1f} m"
+        label = f"Elephant {confidence:.2f} | {distance} m"
         draw_detection(frame, x1, y1, x2, y2, label)
 
-    frame = cv2.resize(frame, (DISPLAY_WIDTH, DISPLAY_HEIGHT))
-    cv2.imshow("Elephant Distance Estimation", frame)
+    display_frame = resize_for_display(frame)
+    cv2.imshow("Elephant Distance Estimation", display_frame)
 
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
