@@ -21,11 +21,21 @@ def estimate_distance(real_width_m, focal_length, bbox_width_px):
     return (real_width_m * focal_length) / bbox_width_px
 
 
-model = YOLO(MODEL_PATH)
+def draw_detection(frame, x1, y1, x2, y2, label):
+    cv2.rectangle(frame, (x1, y1), (x2, y2), BOX_COLOR, 2)
+    cv2.putText(
+        frame,
+        label,
+        (x1, max(25, y1 - 10)),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.6,
+        TEXT_COLOR,
+        2
+    )
 
+
+model = YOLO(MODEL_PATH)
 elephant_id = next((k for k, v in model.names.items() if v == "elephant"), None)
-if elephant_id is None:
-    raise RuntimeError("Elephant class not found")
 
 cap = cv2.VideoCapture(VIDEO_SOURCE)
 
@@ -43,21 +53,14 @@ while True:
         x1, y1, x2, y2 = map(int, box.xyxy[0])
         confidence = float(box.conf.item())
 
-        bbox_width = max(1, x2 - x1)
         distance = estimate_distance(
-            ELEPHANT_WIDTH_M, FOCAL_LENGTH, bbox_width
+            ELEPHANT_WIDTH_M,
+            FOCAL_LENGTH,
+            max(1, x2 - x1)
         )
 
-        cv2.rectangle(frame, (x1, y1), (x2, y2), BOX_COLOR, 2)
-        cv2.putText(
-            frame,
-            f"Elephant {confidence:.2f} | {distance:.1f} m",
-            (x1, max(25, y1 - 10)),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.6,
-            TEXT_COLOR,
-            2
-        )
+        label = f"Elephant {confidence:.2f} | {distance:.1f} m"
+        draw_detection(frame, x1, y1, x2, y2, label)
 
     frame = cv2.resize(frame, (DISPLAY_WIDTH, DISPLAY_HEIGHT))
     cv2.imshow("Elephant Distance Estimation", frame)
