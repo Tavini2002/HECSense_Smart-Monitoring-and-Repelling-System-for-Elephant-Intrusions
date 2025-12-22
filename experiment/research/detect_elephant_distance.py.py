@@ -1,4 +1,5 @@
 import cv2
+import time
 from ultralytics import YOLO
 
 MODEL_PATH = "yolov8s.pt"
@@ -49,10 +50,17 @@ elephant_id = next((k for k, v in model.names.items() if v == "elephant"), None)
 
 cap = cv2.VideoCapture(VIDEO_SOURCE)
 
+prev_time = time.time()
+
 while True:
     ret, frame = cap.read()
     if not ret:
         break
+
+    # FPS calculation
+    current_time = time.time()
+    fps = 1 / (current_time - prev_time)
+    prev_time = current_time
 
     results = model.predict(frame, conf=CONF_THRESHOLD, verbose=False)
 
@@ -71,6 +79,17 @@ while True:
 
         label = f"Elephant {confidence:.2f} | {distance} m"
         draw_detection(frame, x1, y1, x2, y2, label)
+
+    # FPS overlay
+    cv2.putText(
+        frame,
+        f"FPS: {int(fps)}",
+        (15, 30),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.8,
+        (0, 255, 0),
+        2
+    )
 
     display_frame = resize_for_display(frame)
     cv2.imshow("Elephant Distance Estimation", display_frame)
