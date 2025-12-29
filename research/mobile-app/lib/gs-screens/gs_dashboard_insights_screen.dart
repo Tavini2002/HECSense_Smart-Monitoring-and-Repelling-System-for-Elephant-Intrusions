@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/locale_service.dart';
 import '../auth-screens/auth_screen.dart';
 import 'gs_distance_actions_screen.dart'; // Replace with your actual next screen import
 
@@ -26,29 +28,35 @@ class DashboardInsightsScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Heading and Description
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
-                  Text(
-                    'Monitor & Manage',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF129166), // Green heading color
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Access live data, incident reports, and intelligent insights through the mobile dashboard. Analyze patterns to improve safety strategies and protect both humans and elephants.',
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.black87,
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              Consumer<LocaleService>(
+                builder: (context, localeService, child) {
+                  final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        t('monitor_manage'),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF129166), // Green heading color
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        t('monitor_manage_desc'),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  );
+                },
               ),
 
               const SizedBox(height: 0),
@@ -89,13 +97,18 @@ class DashboardInsightsScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
-                      child: const Text(
-                        'Next',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                      child: Consumer<LocaleService>(
+                        builder: (context, localeService, child) {
+                          final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                          return Text(
+                            t('next'),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/locale_service.dart';
+import '../screens/language_selection_screen.dart';
 import 'gs_elephant_detection_screen.dart';
 
 class GetStartedScreen extends StatelessWidget {
@@ -21,20 +24,52 @@ class GetStartedScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Heading at the top
-              Padding(
-                padding: const EdgeInsets.only(top: 40.0),
-                child: Center(
-                  child: Text(
-                    'Welcome to HECSense',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontFamily: 'Helvetica',
+              // Back button and heading
+              Column(
+                children: [
+                  // Back button at the top
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LanguageSelectionScreen(isFirstTime: true),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
+                  // Heading
+                  Consumer<LocaleService>(
+                    builder: (context, localeService, child) {
+                      final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: Center(
+                          child: Text(
+                            t('welcome'),
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontFamily: 'Helvetica',
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
 
               // Center image
@@ -48,18 +83,23 @@ class GetStartedScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Text(
-                      'AI-powered monitoring to prevent human-elephant conflicts with real-time alerts and smart sensors.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20, // bigger text
-                        color: Colors.white, // pure white
-                        fontWeight: FontWeight.w500,
-                        height: 1.4,
-                      ),
-                    ),
+                  Consumer<LocaleService>(
+                    builder: (context, localeService, child) {
+                      final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text(
+                          t('description'),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 20, // bigger text
+                            color: Colors.white, // pure white
+                            fontWeight: FontWeight.w500,
+                            height: 1.4,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -77,23 +117,28 @@ class GetStartedScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    child: Container(
-                      width: 300,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(25),
+                      child: Consumer<LocaleService>(
+                        builder: (context, localeService, child) {
+                          final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                          return Container(
+                            width: 300,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              t('get_started'),
+                              style: const TextStyle(
+                                color: Color(0xFF28A061),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Get Started',
-                        style: TextStyle(
-                          color: Color(0xFF28A061),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
                   ),
                 ),
               ),

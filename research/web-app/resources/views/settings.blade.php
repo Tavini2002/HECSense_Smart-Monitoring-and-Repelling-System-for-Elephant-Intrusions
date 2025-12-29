@@ -23,15 +23,15 @@
         <div class="row align-items-center ">
             <div class="col-md-8">
                 <div class="page-title-box">
-                    <h4 class="page-title">Credentials Settings</h4>
+                    <h4 class="page-title">{{ __('messages.credentials_settings') }}</h4>
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="javascript:void(0);">IOV</a>
+                            <a href="{{ route('show.dashboard') }}">{{ __('messages.home') }}</a>
                         </li>
                         <li class="breadcrumb-item">
-                            <a href="#">Settings</a>
+                            <a href="#">{{ __('messages.settings') }}</a>
                         </li>
-                        <li class="breadcrumb-item active" style="text-transform: capitalize;">Credentials</li>
+                        <li class="breadcrumb-item active" style="text-transform: capitalize;">{{ __('messages.credentials_settings') }}</li>
                     </ol>
                 </div>
             </div>
@@ -80,17 +80,17 @@
         <div class="col-6">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title text-center mb-4">Change Username</h5>
+                    <h5 class="card-title text-center mb-4">{{ __('messages.change_username') }}</h5>
                     <hr>
                     <form id="updateUsernameForm" action="{{ route('update.username') }}" method="POST" onsubmit="confirmUpdate(event)">
                         @csrf
                         <div class="form-group">
-                            <label for="username">Username:</label>
-                            <input type="text" class="form-control" id="username" name="username" value="{{ $username[0] }}" placeholder="Enter the username" oninput="checkUsernameChange()">
+                            <label for="username">{{ __('messages.username') }}:</label>
+                            <input type="text" class="form-control" id="username" name="username" value="{{ $username[0] }}" placeholder="{{ __('messages.enter_username') }}" oninput="checkUsernameChange()">
                         </div>
                         
                         <div class="text-right">
-                            <button class="btn btn-secondary" type="submit" id="updateButton" disabled>Change</button>
+                            <button class="btn btn-secondary" type="submit" id="updateButton" disabled>{{ __('messages.save') }}</button>
                         </div>
                     </form>
                 </div>
@@ -102,27 +102,27 @@
         <div class="col-6">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title text-center mb-4">Change Password</h5>
+                    <h5 class="card-title text-center mb-4">{{ __('messages.change_password') }}</h5>
                     <hr>
                     <form id="changePasswordForm" action="{{ route('update.password') }}" method="POST">
                         @csrf
                         <div class="form-group">
-                            <label for="current_password">Current Password:</label>
-                            <input type="password" class="form-control" id="current_password" name="current_password" placeholder="Enter current password" required>
+                            <label for="current_password">{{ __('messages.current_password') }}:</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" placeholder="{{ __('messages.enter_current_password') }}" required>
                         </div>
                         
                         <div class="form-group">
-                            <label for="new_password">New Password:</label>
-                            <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Enter new password" required>
+                            <label for="new_password">{{ __('messages.new_password') }}:</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" placeholder="{{ __('messages.enter_new_password') }}" required>
                         </div>
                         
                         <div class="form-group">
-                            <label for="new_password_confirmation">Confirm Password:</label>
-                            <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation" placeholder="Confirm new password" required>
+                            <label for="new_password_confirmation">{{ __('messages.confirm_password') }}:</label>
+                            <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation" placeholder="{{ __('messages.confirm_new_password') }}" required>
                         </div>
                         
                         <div class="text-right">
-                            <button class="btn btn-info" type="submit">Change</button>
+                            <button class="btn btn-info" type="submit">{{ __('messages.save') }}</button>
                         </div>
                     </form>
                 </div>
@@ -170,16 +170,16 @@
             event.preventDefault(); // Prevent the default form submission
         
             Swal.fire({
-                title: "Are you sure?",
-                text: "Do you want to update the username?",
+                title: "{{ __('messages.are_you_sure') }}",
+                text: "{{ __('messages.do_you_want_to_update_username') }}",
                 icon: "warning",
                 showCancelButton: true,
                 background: "#12192b",
                 color: "#fff",
                 confirmButtonColor: "#fb4365",
                 cancelButtonColor: "#20d4b6",
-                confirmButtonText: "Yes, update it!",
-                cancelButtonText: "No, cancel!",
+                confirmButtonText: "{{ __('messages.yes_update_it') }}",
+                cancelButtonText: "{{ __('messages.no_cancel') }}",
                 customClass: {
                     popup: 'custom-swal-popup'
                 }

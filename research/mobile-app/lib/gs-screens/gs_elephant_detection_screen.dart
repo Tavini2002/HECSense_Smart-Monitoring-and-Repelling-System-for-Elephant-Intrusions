@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/locale_service.dart';
 import 'gs_instant_alerts_screen.dart'; // Import the next screen
 
 class DetectionElephantScreen extends StatelessWidget {
@@ -25,29 +27,35 @@ class DetectionElephantScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Heading and Description
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
-                  Text(
-                    'AI-Powered Elephant Detection',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF129166), // Green heading
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Detect elephants in real-time using smart cameras and sensors. The system analyzes movement and predicts aggressive actions early to ensure safety.',
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.black87,
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              Consumer<LocaleService>(
+                builder: (context, localeService, child) {
+                  final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        t('ai_elephant_detection'),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF129166), // Green heading
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        t('elephant_detection_desc'),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  );
+                },
               ),
 
               const SizedBox(height: 0),
@@ -88,13 +96,18 @@ class DetectionElephantScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
-                      child: const Text(
-                        'Next',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                      child: Consumer<LocaleService>(
+                        builder: (context, localeService, child) {
+                          final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                          return Text(
+                            t('next'),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/locale_service.dart';
 import '../auth-screens/auth_screen.dart';
-import 'gs_distance_actions_screen.dart'; // Replace with your actual screen
+import 'gs_distance_actions_screen.dart'; // Replace with your actual next screen import
 
 class DashboardInsightsScreen extends StatelessWidget {
   const DashboardInsightsScreen({Key? key}) : super(key: key);
@@ -8,20 +10,17 @@ class DashboardInsightsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Blue Background
-      backgroundColor: Color(0xFF1976D2),
-
+      backgroundColor: Colors.white, // Keep consistent with other screens
       appBar: AppBar(
-        backgroundColor: Color(0xFF1976D2),
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
       ),
-
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -29,43 +28,51 @@ class DashboardInsightsScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Heading and Description
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
-                  Text(
-                    'Monitor & Manage',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // White for contrast
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Access live data, incident reports, and intelligent insights through the mobile dashboard. Analyze patterns to improve safety strategies and protect both humans and elephants.',
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.white,
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              Consumer<LocaleService>(
+                builder: (context, localeService, child) {
+                  final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        t('monitor_manage'),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF129166), // Green heading color
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        t('monitor_manage_desc'),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  );
+                },
               ),
 
-              // Center Image
+              const SizedBox(height: 0),
+
+              // Centered Image
               Expanded(
                 child: Center(
                   child: Image.asset(
-                    'assets/images/dashboard_insights.png',
+                    'assets/images/dashboard_insights.png', // Replace with your actual image
                     height: 400,
                     width: 400,
                   ),
                 ),
               ),
 
-              // Red Button
+              // Gradient Button
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: SizedBox(
@@ -75,24 +82,33 @@ class DashboardInsightsScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const DistanceActionsScreen(),
+                          builder: (context) => const DistanceActionsScreen(), // Replace with the next screen
                         ),
                       );
                     },
                     child: Container(
                       height: 55,
                       decoration: BoxDecoration(
-                        color: Colors.red, // Red button
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF129166), Color(0xFF7FD188)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
-                      child: const Text(
-                        'Next',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                      child: Consumer<LocaleService>(
+                        builder: (context, localeService, child) {
+                          final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                          return Text(
+                            t('next'),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

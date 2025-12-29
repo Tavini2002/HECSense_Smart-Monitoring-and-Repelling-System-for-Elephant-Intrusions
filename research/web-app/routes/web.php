@@ -10,7 +10,14 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MobileUserController;
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\DetectionController;
+use App\Http\Controllers\DetectionSessionController;
+use App\Http\Controllers\AnalyticsController;
 
+
+use App\Http\Controllers\LanguageController;
+
+Route::get('/language/{locale}', [LanguageController::class, 'switchLanguage'])->name('language.switch');
 
 Route::get('/', [AuthenticationController::class, 'index'])->name("index");
 Route::post('/login', [AuthenticationController::class, 'login'])->name("login");
@@ -39,6 +46,30 @@ Route::middleware(['CheckAdminAuth'])->group(function () {
     Route::post('organ-requests/reject/{id}', [OrganController::class, 'rejectOrganRequest'])->name('reject.organ.request');
     Route::post('organ-requests/ajax', [OrganController::class, 'processOrganRequestsAjax'])->name('process.organ.requests.ajax');
 
+    // Elephant Detection Routes
+    Route::prefix('detections')->name('detections.')->group(function () {
+        Route::get('/', [DetectionController::class, 'index'])->name('index');
+        Route::get('/{id}', [DetectionController::class, 'show'])->name('show');
+        Route::post('/ajax', [DetectionController::class, 'ajax'])->name('ajax');
+    });
+
+    // Detection Sessions Routes
+    Route::prefix('sessions')->name('sessions.')->group(function () {
+        Route::get('/', [DetectionSessionController::class, 'index'])->name('index');
+        Route::get('/{id}', [DetectionSessionController::class, 'show'])->name('show');
+        Route::delete('/{id}', [DetectionSessionController::class, 'destroy'])->name('destroy');
+        Route::post('/ajax', [DetectionSessionController::class, 'ajax'])->name('ajax');
+    });
+
+    // Analytics Routes
+    Route::prefix('analytics')->name('analytics.')->group(function () {
+        Route::get('/', [AnalyticsController::class, 'index'])->name('index');
+        Route::get('/behavior-chart', [AnalyticsController::class, 'getBehaviorChart'])->name('behavior.chart');
+        Route::get('/speed-chart', [AnalyticsController::class, 'getSpeedChart'])->name('speed.chart');
+        Route::get('/timeline-chart', [AnalyticsController::class, 'getTimelineChart'])->name('timeline.chart');
+        Route::get('/alert-chart', [AnalyticsController::class, 'getAlertChart'])->name('alert.chart');
+        Route::get('/sessions-chart', [AnalyticsController::class, 'getSessionsChart'])->name('sessions.chart');
+    });
 
     Route::post('/update-username', [SettingController::class, 'updateUsername'])->name('update.username');
     Route::post('/update-password', [SettingController::class, 'updatePassword'])->name('update.password');

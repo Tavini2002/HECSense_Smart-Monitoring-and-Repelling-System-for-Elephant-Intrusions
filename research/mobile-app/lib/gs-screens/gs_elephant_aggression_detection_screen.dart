@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/locale_service.dart';
 import '../auth-screens/auth_screen.dart';
-import 'gs_emergency_support_screen.dart'; // Update if the next screen differs
 
 class AggressionDetectionScreen extends StatelessWidget {
   const AggressionDetectionScreen({Key? key}) : super(key: key);
@@ -24,29 +25,35 @@ class AggressionDetectionScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Heading + Body
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
-                  Text(
-                    'Elephant Aggression Detection',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF129166),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Detect early signs of aggressive behavior using AI. The system analyzes posture, speed, trunk and ear movement to predict risk and trigger timely responses.',
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.black87,
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              Consumer<LocaleService>(
+                builder: (context, localeService, child) {
+                  final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        t('elephant_aggression_detection'),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF129166),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        t('elephant_aggression_detection_desc'),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  );
+                },
               ),
 
               // Illustration (transparent vector)
@@ -68,7 +75,7 @@ class AggressionDetectionScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const EmergencyMedicalSupportScreen()),
+                      MaterialPageRoute(builder: (_) => const HomeScreen()),
                     );
                   },
                   child: Container(
@@ -82,13 +89,18 @@ class AggressionDetectionScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.center,
-                    child: const Text(
-                      'Next',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                    child: Consumer<LocaleService>(
+                      builder: (context, localeService, child) {
+                        final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                        return Text(
+                          t('next'),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

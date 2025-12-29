@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/locale_service.dart';
 import 'create_account_screen.dart'; // Import the CreateAccountScreen
 import 'login_screen.dart'; // Import the LoginScreen
 
@@ -36,74 +38,80 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             // Login and Create Account Buttons
-            Column(
-              children: [
-                // Login Button
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                  child: SizedBox(
-                    width: 250, // Set fixed width for the button
-                    child: OutlinedButton(
-                      onPressed: () {
-                        // Navigate to Login Screen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginScreen(),
+            Consumer<LocaleService>(
+              builder: (context, localeService, child) {
+                final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                
+                return Column(
+                  children: [
+                    // Login Button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                      child: SizedBox(
+                        width: 250, // Set fixed width for the button
+                        child: OutlinedButton(
+                          onPressed: () {
+                            // Navigate to Login Screen
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginScreen(),
+                              ),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            side: const BorderSide(color: Color(0xFF28A061), width: 2),
                           ),
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        side: const BorderSide(color: Color(0xFF28A061), width: 2),
-                      ),
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(
-                          color: Color(0xFF28A061),
-                          fontSize: 18,
+                          child: Text(
+                            t('login'),
+                            style: const TextStyle(
+                              color: Color(0xFF28A061),
+                              fontSize: 18,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 15),
-                // Create Account Button
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                  child: SizedBox(
-                    width: 250, // Set fixed width for the button
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Navigate to CreateAccountScreen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CreateAccountScreen(),
+                    const SizedBox(height: 15),
+                    // Create Account Button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                      child: SizedBox(
+                        width: 250, // Set fixed width for the button
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // Navigate to CreateAccountScreen
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CreateAccountScreen(),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            backgroundColor: Color(0xFF28A061),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        backgroundColor: Color(0xFF28A061),
-                      ),
-                      child: const Text(
-                        'Create Account',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
+                          child: Text(
+                            t('create_account'),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
             // Bottom Wave Image
             Image.asset(

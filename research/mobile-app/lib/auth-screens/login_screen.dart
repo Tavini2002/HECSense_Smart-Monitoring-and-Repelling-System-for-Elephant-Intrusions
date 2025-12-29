@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config.dart';
+import '../services/locale_service.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../gs-screens/gs_user_waitlist_screen.dart';  // Import the waitlist screen
 
@@ -91,8 +93,16 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login', style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF28A061),
+        title: Consumer<LocaleService>(
+          builder: (context, localeService, child) {
+            final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+            return Text(
+              t('login'),
+              style: const TextStyle(color: Colors.white),
+            );
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -140,9 +150,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     backgroundColor: Color(0xFF28A061),
                   ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  child: Consumer<LocaleService>(
+                    builder: (context, localeService, child) {
+                      final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                      return Text(
+                        t('login'),
+                        style: const TextStyle(color: Colors.white, fontSize: 18),
+                      );
+                    },
                   ),
                 ),
               ),

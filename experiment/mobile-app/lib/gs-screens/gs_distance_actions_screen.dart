@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/locale_service.dart';
 import '../auth-screens/auth_screen.dart';
-import 'gs_elephant_aggression_detection_screen.dart';
+import 'gs_elephant_aggression_detection_screen.dart'; // Update if the next screen is different
 
 class DistanceActionsScreen extends StatelessWidget {
   const DistanceActionsScreen({Key? key}) : super(key: key);
@@ -8,18 +10,15 @@ class DistanceActionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Blue Background
-      backgroundColor: Color(0xFF1976D2),
-
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Color(0xFF1976D2),
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -27,44 +26,51 @@ class DistanceActionsScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Heading & Description
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
-                  Text(
-                    'Adaptive Responses by Distance',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // White for contrast on blue
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'HECSense intelligently measures how close the elephants are. '
-                        'From gentle alerts to loud deterrents — the system reacts smartly based on the threat level.',
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.white,
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              Consumer<LocaleService>(
+                builder: (context, localeService, child) {
+                  final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        t('adaptive_response_distance'),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF129166),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        t('adaptive_response_distance_desc'),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  );
+                },
               ),
+
+              const SizedBox(height: 0),
 
               // Illustration
               Expanded(
                 child: Center(
                   child: Image.asset(
-                    'assets/images/distance_actions.png',
+                    'assets/images/distance_actions.png', // add your vector here
                     height: 400,
                     width: 400,
                   ),
                 ),
               ),
 
-              // Red Next Button
+              // Next Button
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: SizedBox(
@@ -74,24 +80,33 @@ class DistanceActionsScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AggressionDetectionScreen(),
+                          builder: (context) => const AggressionDetectionScreen(), // or your next screen
                         ),
                       );
                     },
                     child: Container(
                       height: 55,
                       decoration: BoxDecoration(
-                        color: Colors.red, // Red button
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF129166), Color(0xFF7FD188)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
-                      child: const Text(
-                        'Next',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white, // White text
-                        ),
+                      child: Consumer<LocaleService>(
+                        builder: (context, localeService, child) {
+                          final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                          return Text(
+                            t('next'),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

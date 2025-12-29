@@ -2,16 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class MobileUser extends Model
 {
     use HasFactory;
 
-    /**
-     * Attributes allowed for mass assignment
-     */
+    // Define the fillable fields
     protected $fillable = [
         'full_name',
         'username',
@@ -26,11 +24,11 @@ class MobileUser extends Model
         'status',
     ];
 
-    /**
-     * Fetch all organ requests created by the user
-     */
-    public function organRequestList()
+    public function organRequests()
     {
         return $this->hasMany(OrganRequest::class, 'user_id');
     }
+
+
+    // Optionally, define any relationships or methods here if needed
 }

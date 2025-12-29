@@ -73,28 +73,28 @@
                                 @csrf
                                 <div class="form-group" style="opacity: 1 !important;">
                                     <div class="col-12">
-                                        <label for="username">Username</label>
-                                        <input class="form-control" required type="text" id="username" name="username" placeholder="Username">
+                                        <label for="username">{{ __('messages.username') }}</label>
+                                        <input class="form-control" required type="text" id="username" name="username" placeholder="{{ __('messages.username') }}">
                                     </div>
                                 </div>
 
                                 <div class="form-group" style="opacity: 1 !important;">
                                     <div class="col-12">
-                                        <label for="password">Password</label>
-                                        <input class="form-control" required type="password" id="password" name="password" placeholder="Password">
+                                        <label for="password">{{ __('messages.password') }}</label>
+                                        <input class="form-control" required type="password" id="password" name="password" placeholder="{{ __('messages.password') }}">
                                     </div>
                                 </div>
 
                                 <div class="form-group text-center mt-3">
                                     <div class="col-12">
-                                        <button class="btn btn-primary btn-block waves-effect waves-light" type="submit">Log In</button>
+                                        <button class="btn btn-primary btn-block waves-effect waves-light" type="submit">{{ __('messages.login') }}</button>
                                     </div>
                                 </div>
 
                                 <div class="form-group text-center mt-4">
                                     <div class="col-12">
                                         <div class="float-center">
-                                            <a href="mailto:info@mpowerr.com" class="text-muted"><i class="fa fa-lock mr-1"></i> Forgot your password?</a>
+                                            <a href="mailto:info@mpowerr.com" class="text-muted"><i class="fa fa-lock mr-1"></i> {{ __('messages.forgot_password') }}</a>
                                         </div>
                                     </div>
                                 </div>                                

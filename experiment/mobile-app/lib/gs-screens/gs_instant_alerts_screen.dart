@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'gs_instant_alerts_screen.dart';
+import 'package:provider/provider.dart';
+import '../services/locale_service.dart';
 import 'gs_dashboard_insights_screen.dart'; // Import the next screen
 
 class InstantAlertsScreen extends StatelessWidget {
@@ -8,12 +9,12 @@ class InstantAlertsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue, // 🔵 Background changed to blue
+      backgroundColor: Colors.white, // Keep white background
       appBar: AppBar(
-        backgroundColor: Colors.blue, // Match app bar color
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -26,29 +27,35 @@ class InstantAlertsScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Heading and Description
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
-                  Text(
-                    'Smart Alerts && Responses',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // White heading on blue
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Get instant alerts in your phone when elephants are nearby. The system automatically plays warning sounds and triggers deterrent actions to keep everyone safe.',
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.white, // White text on blue
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              Consumer<LocaleService>(
+                builder: (context, localeService, child) {
+                  final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        t('instant_alerts'),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF129166), // Green heading
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        t('instant_alerts_desc'),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  );
+                },
               ),
 
               const SizedBox(height: 0),
@@ -57,14 +64,14 @@ class InstantAlertsScreen extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: Image.asset(
-                    'assets/images/instant_alerts.png',
+                    'assets/images/instant_alerts.png', // Replace with your actual image
                     height: 400,
                     width: 400,
                   ),
                 ),
               ),
 
-              // Red Button
+              // Gradient Button
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: SizedBox(
@@ -81,17 +88,26 @@ class InstantAlertsScreen extends StatelessWidget {
                     child: Container(
                       height: 55,
                       decoration: BoxDecoration(
-                        color: Colors.red, // 🔴 Solid red button
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF129166), Color(0xFF7FD188)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
-                      child: const Text(
-                        'Next',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                      child: Consumer<LocaleService>(
+                        builder: (context, localeService, child) {
+                          final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                          return Text(
+                            t('next'),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

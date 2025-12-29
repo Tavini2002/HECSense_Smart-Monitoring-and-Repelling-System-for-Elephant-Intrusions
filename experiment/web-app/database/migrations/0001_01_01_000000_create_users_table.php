@@ -19,9 +19,9 @@ return new class extends Migration
         });
 
 
-        DB::table('users')->insert([
+        \Illuminate\Support\Facades\DB::table('users')->insert([
             'username' => 'admin',
-            'password' => Hash::make('admin'),
+            'password' => \Illuminate\Support\Facades\Hash::make('admin'),
             'role' => 'admin',
         ]);
 

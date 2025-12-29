@@ -1,77 +1,55 @@
 import 'package:flutter/material.dart';
-import 'dashboard_screen.dart';
+import 'dashboard_screen.dart'; // Import your DashboardScreen
 
-class MessageDeliveredView extends StatelessWidget {
-  const MessageDeliveredView({super.key});
-
-  void _navigateHome(BuildContext context) {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const DashboardScreen()),
-          (_) => false,
-    );
-  }
+class MessageSentScreen extends StatelessWidget {
+  const MessageSentScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.check_circle,
-                size: 100,
-                color: Colors.green,
-              ),
-
-              const SizedBox(height: 20),
-
-              const Text(
-                "Your message has been sent!",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              const Text(
-                "The hospital will reach out to you soon regarding your request.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
-
-              const SizedBox(height: 35),
-
-              SizedBox(
-                width: 210,
-                child: ElevatedButton(
-                  onPressed: () => _navigateHome(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF4444),
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green, size: 100),
+            const SizedBox(height: 20),
+            const Text(
+              'Your message has been sent!',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'The hospital will contact you shortly regarding your request.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: 200,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Clear the navigation stack and push the Dashboard screen
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                        (Route<dynamic> route) => false,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF4444),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
-                    "Okay, Thank You!",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                    ),
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+                child: const Text(
+                  'Okay, Thank You!',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

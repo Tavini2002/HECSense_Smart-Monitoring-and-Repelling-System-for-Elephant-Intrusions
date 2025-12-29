@@ -33,13 +33,13 @@
         <div class="row align-items-center ">
           <div class="col-md-8">
             <div class="page-title-box">
-                <h4 class="page-title">Mobile Users</h4>
+                <h4 class="page-title">{{ __('messages.mobile_users') }}</h4>
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <a>Mobile App</a>
+                        <a href="{{ route('show.dashboard') }}">{{ __('messages.home') }}</a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="#">Users</a>
+                        <a href="#">{{ __('messages.user_accounts') }}</a>
                     </li>
                 </ol>
             </div>
@@ -88,13 +88,13 @@
                 <table id="datatable" class="table table-bordered display nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead>
                         <tr>
-                        <th>Action</th>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Phone Number</th>
-                        <th>Gender</th>
-                        <th>Date of Birth</th>
-                        <th>Status</th>
+                        <th>{{ __('messages.action') }}</th>
+                        <th>{{ __('messages.full_name') }}</th>
+                        <th>{{ __('messages.email') }}</th>
+                        <th>{{ __('messages.phone_number') }}</th>
+                        <th>{{ __('messages.gender') }}</th>
+                        <th>{{ __('messages.date_of_birth') }}</th>
+                        <th>{{ __('messages.status') }}</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

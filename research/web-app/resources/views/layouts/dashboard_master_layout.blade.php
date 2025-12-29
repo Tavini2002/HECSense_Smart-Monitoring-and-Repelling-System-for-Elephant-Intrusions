@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 
 <head>
     <meta charset="utf-8" />
@@ -52,6 +52,25 @@
         .swal2-popup {
             border: 2px solid #6E7681; /* Set border color and width */
         }
+
+        /* Language Switcher Vertical Centering */
+        .navbar-custom {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+        }
+
+        .language-switcher-buttons {
+            display: flex !important;
+            align-items: center !important;
+            margin-bottom: 0 !important;
+            height: 70px !important;
+        }
+
+        .language-switcher-buttons .list-inline-item {
+            display: flex !important;
+            align-items: center !important;
+        }
     </style>
 
     <script>
@@ -91,7 +110,7 @@
             <!-- Search input -->
             <div class="search-wrap" id="search-wrap">
                 <div class="search-bar">
-                    <input class="search-input" type="search" placeholder="Search" />
+                    <input class="search-input" type="search" placeholder="{{ __('messages.search') }}" />
                     <a href="#" class="close-search toggle-search" data-target="#search-wrap">
                         <i class="mdi mdi-close-circle"></i>
                     </a>
@@ -100,12 +119,30 @@
 
             <nav class="navbar-custom">
                
-
                 <ul class="list-inline menu-left mb-0">
                     <li class="float-left">
                         <button class="button-menu-mobile open-left waves-effect">
                             <i class="mdi mdi-menu"></i>
                         </button>
+                    </li>
+                </ul>
+
+                <!-- Language Switcher -->
+                <ul class="list-inline float-right mb-0 language-switcher-buttons">
+                    <li class="list-inline-item">
+                        <a href="{{ route('language.switch', 'en') }}" class="btn btn-sm waves-effect waves-light {{ app()->getLocale() == 'en' ? 'btn-primary' : 'btn-secondary' }}" style="margin-right: 5px;">
+                            English
+                        </a>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="{{ route('language.switch', 'si') }}" class="btn btn-sm waves-effect waves-light {{ app()->getLocale() == 'si' ? 'btn-primary' : 'btn-secondary' }}" style="margin-right: 5px;">
+                            සිංහල
+                        </a>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="{{ route('language.switch', 'ta') }}" class="btn btn-sm waves-effect waves-light {{ app()->getLocale() == 'ta' ? 'btn-primary' : 'btn-secondary' }}">
+                            தமிழ்
+                        </a>
                     </li>
                 </ul>
 
@@ -122,11 +159,23 @@
                 <div id="sidebar-menu">
                     <!-- Left Menu Start -->
                     <ul class="metismenu" id="side-menu">
-                        <li class="menu-title">Menu</li>
+                        <li class="menu-title">{{ __('messages.menu') }}</li>
                     
                         <li>
                             <a href="{{ route('show.dashboard') }}" class="waves-effect">
-                                <i class="dripicons-meter"></i> <span> Dashboard </span>
+                                <i class="dripicons-meter"></i> <span> {{ __('messages.dashboard') }} </span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('sessions.index') }}" class="waves-effect">
+                                <i class="mdi mdi-video"></i> <span> {{ __('messages.detection_sessions') }} </span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('detections.index') }}" class="waves-effect">
+                                <i class="mdi mdi-radar"></i> <span> {{ __('messages.detections') }} </span>
                             </a>
                         </li>
                     
@@ -154,20 +203,20 @@
                     
                         <li>
                             <a href="{{ route('show.mobile.users') }}" class="waves-effect">
-                                <i class="fa fa-users"></i> <span> User Accounts </span>
+                                <i class="fa fa-users"></i> <span> {{ __('messages.user_accounts') }} </span>
                             </a>
                         </li>
 
                         <li>
                             <a href="{{ route('show.settings') }}" class="waves-effect">
-                                <i class="fa fa-cog"></i> <span> Settings </span>
+                                <i class="fa fa-cog"></i> <span> {{ __('messages.settings') }} </span>
                             </a>
                         </li>
                     
                     
                         <li>
                             <a href="{{ route('logout') }}" class="waves-effect">
-                                <i class="fas fa-power-off"></i> <span> Logout </span>
+                                <i class="fas fa-power-off"></i> <span> {{ __('messages.logout') }} </span>
                             </a>
                         </li>
                     </ul>
@@ -197,7 +246,7 @@
             <!-- content -->
 
             <footer class="footer">
-                © {{ date('Y') }} All Rights Reserved.
+                © {{ date('Y') }} {{ __('messages.all_rights_reserved') }}.
             </footer>                     
 
         </div>

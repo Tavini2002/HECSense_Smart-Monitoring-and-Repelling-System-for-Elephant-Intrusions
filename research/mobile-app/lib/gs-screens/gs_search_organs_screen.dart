@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/locale_service.dart';
 import 'gs_dashboard_insights_screen.dart'; // Import the MessagingScreen
 
 class SearchOrgansScreen extends StatelessWidget {

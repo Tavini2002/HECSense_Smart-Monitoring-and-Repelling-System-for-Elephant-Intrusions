@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import '../services/locale_service.dart';
 import 'login_screen.dart'; // Import the LoginScreen
 import '../config.dart'; // Import the config file
 
@@ -84,11 +86,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Create Account',
-          style: TextStyle(color: Colors.white),
-        ),
         backgroundColor: const Color(0xFF28A061),
+        title: Consumer<LocaleService>(
+          builder: (context, localeService, child) {
+            final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+            return Text(
+              t('create_account'),
+              style: const TextStyle(color: Colors.white),
+            );
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -179,9 +186,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   backgroundColor: const Color(0xFF28A061),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
-                child: const Text(
-                  'Create Account',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                child: Consumer<LocaleService>(
+                  builder: (context, localeService, child) {
+                    final t = (String key) => LocaleService.translate(key, localeService.locale.languageCode);
+                    return Text(
+                      t('create_account'),
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    );
+                  },
                 ),
               ),
             ],
