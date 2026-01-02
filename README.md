@@ -1,7 +1,3 @@
-# Train-Project
-[Train Project Architecture Diagram](https://drive.google.com/file/d/1zul0nLJYjdgD0Dux_9ji6uScgKo8Gw-I/view?usp=drivesdk)
-
-
 **Overall Project Repository**
 **Overview**
 
@@ -30,7 +26,7 @@ Each team member has developed their assigned modules in their respective branch
 
 All functionalities are available branch-wise and can be reviewed individually.
 
-Integration Status
+**Integration Status**
 
 &nbsp;	Full integration into a single branch is not completed
 
@@ -103,3 +99,8 @@ Sivashangar
                 4. Power up the ESP32 again.
 
         Both the ESP32 and the server device must be connected to the same network.
+
+
+
+# Train-Project
+[Train Project Architecture Diagram](https://drive.google.com/file/d/1zul0nLJYjdgD0Dux_9ji6uScgKo8Gw-I/view?usp=drivesdk)
