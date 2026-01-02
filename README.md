@@ -83,6 +83,18 @@ Tavini
         Step 05: Open VS Code Terminal and run "npm run dev"
         Step 06: Navigate to frontend
         Step 05: Open VS Code Terminal and run "npm run dev"
+        Step 04: Connect ESP32 sensor to a power source
+
+        If server is already running;
+                the ESP32 will automatically connect to it.
+
+        If the ESP32 does not connect to the server;
+                1. Check the IPv4 address of the device where the server is running.
+                2. Update the IP address in the ESP32 code with the correct IPv4 address.
+                3. Upload the updated code to the ESP32.
+                4. Power up the ESP32 again.
+
+        Both the ESP32 and the server device must be connected to the same network.
 
 
 Sivashangar
