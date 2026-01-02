@@ -1,58 +1,26 @@
 import express from "express";
-import axios from "axios";
-import dotenv from "dotenv";
-import { injectToken } from "../middleware/injectToken.js";
-
-dotenv.config();
+import pool from "../db.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-const SERVER_URL = process.env.SERVER_URL;
 
-// STORE BOTH RELAY STATES
-let esp32State = {
-  ALARM: "OFF",
-  BRAKE: "OFF",
-};
-
-//  AUTTH 
-router.get("/profile", injectToken, async (req, res) => {
+// Get logged-in train profile
+router.get("/profile", authMiddleware, async (req, res) => {
   try {
-    const response = await axios.get(`${SERVER_URL}/data/profile`, {
-      headers: {
-        Authorization: req.token,
-      },
-    });
+    const [rows] = await pool.query(
+      "SELECT train_id, train_name, created_at FROM trains WHERE train_id = ?",
+      [req.user.train_id]
+    );
 
-    res.json(response.data);
-  } catch (error) {
-    res.status(error.response?.status || 500).json(error.response?.data);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Train not found" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
-});
-
-//  FRONTEND SENDS RELAY COMMANDS 
-router.post("/esp32/control", (req, res) => {
-  const { device, state } = req.body;
-
-  if (
-    !device ||
-    !state ||
-    !["ALARM", "BRAKE"].includes(device) ||
-    !["ON", "OFF"].includes(state)
-  ) {
-    return res.status(400).json({ message: "Invalid device or state" });
-  }
-
-  esp32State[device] = state;
-
-  res.json({
-    message: `${device} set to ${state}`,
-    esp32State,
-  });
-});
-
-//  ESP32 POLLS BOTH RELAY STATES 
-router.get("/esp32/command", (req, res) => {
-  res.json(esp32State);
 });
 
 export default router;
