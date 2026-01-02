@@ -18,17 +18,12 @@ Each team member has developed their assigned modules in their respective branch
 **Branch Structure \& Contributors**
 
 
-
-**Branch Name			    Contributor             IT Number		      Description**
-
-IT22904300Sivashangar		Sivashangar S.          IT22904300		      Elephant Detection and Risk Classification System
-
-Tavini				        Perera K.A.T.M.	        IT22917102	              Smart Train Control System for Collision Prevention
-
-Keerthana			        Keerthana S.	        IT22182128                    Emotion, Health and Behavior – Based Elephant Monitoring \& Alert System 
-
-Harshika			        Harshika M.		        IT22064554                    Smart Eco – Friendly Crop Shielding \& Adaptive Repelling System
-
+| Branch Name | Contributor | IT Number | Description |
+|-------------|-------------|-----------|-------------|
+| IT22904300Sivashangar | Sivashangar S. | IT22904300 | Elephant Detection and Risk Classification System |
+| Tavini | Perera K.A.T.M. | IT22917102 | Smart Train Control System for Collision Prevention |
+| Keerthana | Keerthana S. | IT22182128 | Emotion, Health and Behavior – Based Elephant Monitoring & Alert System |
+| Harshika | Harshika M. | IT22064554 | Smart Eco–Friendly Crop Shielding & Adaptive Repelling System |
 
 
 
@@ -93,18 +88,18 @@ Tavini
 
 Sivashangar
 ---------------
-Step 01: Open VS Code
-Step 02: Navigate to sensor_server
-Step 03: Open VS Code Terminal and run "npm server"
-Step 04: Connect ESP32 sensor to a power source
+        Step 01: Open VS Code
+        Step 02: Navigate to sensor_server
+        Step 03: Open VS Code Terminal and run "npm server"
+        Step 04: Connect ESP32 sensor to a power source
 
-If server is already running;
-        the ESP32 will automatically connect to it.
+        If server is already running;
+                the ESP32 will automatically connect to it.
 
-If the ESP32 does not connect to the server;
-        1. Check the IPv4 address of the device where the server is running.
-        2. Update the IP address in the ESP32 code with the correct IPv4 address.
-        3. Upload the updated code to the ESP32.
-        4. Power up the ESP32 again.
+        If the ESP32 does not connect to the server;
+                1. Check the IPv4 address of the device where the server is running.
+                2. Update the IP address in the ESP32 code with the correct IPv4 address.
+                3. Upload the updated code to the ESP32.
+                4. Power up the ESP32 again.
 
-Both the ESP32 and the server device must be connected to the same network.
+        Both the ESP32 and the server device must be connected to the same network.
