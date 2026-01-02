@@ -19,7 +19,7 @@ Each team member has developed their assigned modules in their respective branch
 
 | Branch Name | Contributor | IT Number | Description |
 |-------------|-------------|-----------|-------------|
-| IT22904300Sivashangar | Sivashangar S. | IT22904300 | Elephant Detection and Risk Classification System |
+| Chiyaan | Sivashangar S. | IT22904300 | Elephant Detection and Risk Classification System |
 | Tavini | Perera K.A.T.M. | IT22917102 | Smart Train Control System for Collision Prevention |
 | Keerthana | Keerthana S. | IT22182128 | Emotion, Health and Behavior – Based Elephant Monitoring & Alert System |
 | Harshika | Harshika M. | IT22064554 | Smart Eco–Friendly Crop Shielding & Adaptive Repelling System |
