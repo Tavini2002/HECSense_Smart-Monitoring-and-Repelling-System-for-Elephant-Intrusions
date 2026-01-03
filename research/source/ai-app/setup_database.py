@@ -11,7 +11,7 @@ from datetime import datetime
 # Database Configuration
 DB_CONFIG = {
     'host': os.getenv('MYSQL_HOST', 'localhost'),
-    'port': int(os.getenv('MYSQL_PORT', 3306)),
+    'port': int(os.getenv('MYSQL_PORT', 3307)),
     'user': os.getenv('MYSQL_USER', 'root'),
     'password': os.getenv('MYSQL_PASSWORD', ''),
     'database': None  # Will be created

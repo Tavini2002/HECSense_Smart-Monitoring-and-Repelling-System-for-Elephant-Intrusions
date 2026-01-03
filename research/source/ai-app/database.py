@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Database Configuration
 DB_CONFIG = {
     'host': os.getenv('MYSQL_HOST', 'localhost'),
-    'port': int(os.getenv('MYSQL_PORT', 3306)),
+    'port': int(os.getenv('MYSQL_PORT', 3307)),
     'user': os.getenv('MYSQL_USER', 'root'),
     'password': os.getenv('MYSQL_PASSWORD', ''),
     'database': os.getenv('MYSQL_DATABASE', 'hec_sense_ai_farm_app'),
