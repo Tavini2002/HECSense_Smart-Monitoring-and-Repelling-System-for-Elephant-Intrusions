@@ -1,11 +1,13 @@
+#include <dummy.h>
+
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char* ssid = "Galaxy A05 AL";
-const char* password = "whywifi1";
+const char* ssid = "Chiyaan";
+const char* password = "12345611";
 
 //  API GATEWAY IP 
-const char* API_URL = "http://10.22.68.50:4000/data/esp32/command";
+const char* API_URL = "http://172.20.10.4:4000/data/esp32/command";
 
 
 #define ALARM_RELAY_PIN 26
