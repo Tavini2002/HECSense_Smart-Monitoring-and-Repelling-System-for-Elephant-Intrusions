@@ -1,4 +1,4 @@
-**Overall Project Repository**
+*Overall Project Repository*
 
 
 Overview
@@ -52,26 +52,58 @@ https://github.com/Tavini2002/HECSense\_Smart-Monitoring-and-Repelling-System-fo
 
 **How to run each component**
 
-Keerthana
----------------
-        Step 01: Start XAMMP
-        Step 02: php artisan serve (Start web app)
-        Step 03: activate ai-env 
-        Step 04: python main-app.py
-
 Harshika
 ---------------
+*AI Application (Streamlit)*
+        
+        Step 01: Navigate to project - cd C:\Users\user\OneDrive\Desktop\project\hec-sense-ai-app\my version\research\source\ai-app
+        Step 02: Activate virtual environment- activate ai-env
+        Step 03: Run Streamlit app- streamlit run main-app.py
+                Access at: `http://localhost:8501`
+        
+*Web Dashboard (PHP)*
 
-        AI App
-        --------------
-        Step: 01: Start XAMMP
-        Step: 02: activate ai-env
-        Step: 03: streamlit run main-app.py
+        Step 01: Start XAMPP- Open XAMPP Control Panel → Click "Start" on Apache & MySQL
+        Step 02: Navigate to web app
+                cd C:\Users\user\OneDrive\Desktop\project\hec-sense-ai-app\my version\research\source\web-app
+        Step 03: Start PHP server - php -S localhost:8000
+                Access at : `http://localhost:8000`
+                Login credentials:
+-                        Username: `admin`
+-                        Password: `admin`
+   
+Keerthana
+---------------
 
-        Web App
-        --------------
+*Web app (Php /Laravel)*
+        
+        Step 01: Start XAMPP Control Panel (MySQL + Apache)
+                ‘Open cmd’
+        Step 02: Navigate to project - cd research\web-app
+        Step 03: Run web app: php artisan serve - host=127.0.0.1 - port=8000
+                        Login credentials:
+                        - Username: ‘admin’
+                        - Password: ‘admin’
 
-        Step:01 php -S localhost:8000
+*AI app (Python)* 
+
+        ‘Open cmd’
+        Step 01: Navigate to AI app: cd research\ai-app
+        Step 02: Run AI app: 
+                if ai-env exists:
+                        ai-env\Scripts\activate
+                otherwise create + activate:
+                        python -m venv ai-env
+                        ai-env\Scripts\activate
+                        pip install requests
+                        python main-app.py
+
+
+*Mobile app (Flutter/Dart)* 
+
+        Step 01: Navigate to AI app: cd research\ai-app
+        Step 02: Run Mobile app using android studio
+
 
 
 Tavini
