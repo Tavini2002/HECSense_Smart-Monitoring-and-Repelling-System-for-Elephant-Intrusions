@@ -54,7 +54,8 @@ https://github.com/Tavini2002/HECSense\_Smart-Monitoring-and-Repelling-System-fo
 
 Harshika
 ---------------
-**AI Application (Streamlit)**
+*AI Application (Streamlit)*
+
         'open cmd'
         Step 01: Navigate to project - cd C:\Users\user\OneDrive\Desktop\project\hec-sense-ai-app\my version\research\source\ai-app
         Step 02: Activate virtual environment- activate ai-env
