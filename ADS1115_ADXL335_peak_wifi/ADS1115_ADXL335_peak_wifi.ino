@@ -2,13 +2,25 @@
 #include <Adafruit_ADS1X15.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WebServer.h>
+#include <ArduinoJson.h>
 
 
 const char* ssid = "Galaxy A05 AL";
 const char* password = "whywifi1";
 
-// ✅ CHANGE THIS TO YOUR PC IP ADDRESS
-const char* serverURL = "http://10.122.70.50:3000/alert";
+// PC IP ADDRESS (sensor server)
+const char* serverURL = "http://10.236.80.50:3000/alert";
+
+// SENSOR IDENTIFIER
+const char* DEVICE_CODE = "ZONE_1";
+
+// RELAY PINS
+#define RELAY_ALARM_PIN 25
+#define RELAY_BRAKE_PIN 26
+
+// Web server for direct app commands (port 80)
+WebServer cmdServer(80);
 
 Adafruit_ADS1115 ads1;   // 0x48
 Adafruit_ADS1115 ads2;   // 0x49
@@ -20,7 +32,7 @@ Adafruit_ADS1115 ads2;   // 0x49
 #define WINDOW_SIZE     40        // sliding window
 #define SAMPLE_PERIOD_US (1000000.0 / SAMPLE_RATE)
 
-// ADXL335 constants
+// ADXL335 constantsvg
 const float VREF = 4.096;
 const float ADC_MAX = 32768.0;
 const float ZERO_G = 1.65;
@@ -37,8 +49,8 @@ bool bufferFilled = false;
 unsigned long lastSampleMicros = 0;
 
 
-bool alertArmed[8] = {true, true, true, true, true, true, true, true};  // ✅ One-shot trigger per sensor
-unsigned long lastAlertTime[8] = {0, 0, 0, 0, 0, 0, 0, 0};  // ✅ Cooldown timer
+bool alertArmed[8] = {true, true, true, true, true, true, true, true};  // One-shot trigger per sensor
+unsigned long lastAlertTime[8] = {0, 0, 0, 0, 0, 0, 0, 0};  // Cooldown timer
 
 // ======================
 // MIDDLE STATE MACHINE
@@ -66,10 +78,58 @@ int lastRightDistance = 99;
 
 
 // ======================
+// COMMAND HANDLER (called by WebServer)
+// ======================
+void handleCommand() {
+  if (cmdServer.method() != HTTP_POST) {
+    cmdServer.send(405, "application/json", "{\"error\":\"Method not allowed\"}");
+    return;
+  }
+
+  String body = cmdServer.arg("plain");
+  StaticJsonDocument<128> doc;
+  DeserializationError err = deserializeJson(doc, body);
+
+  if (err) {
+    cmdServer.send(400, "application/json", "{\"error\":\"Invalid JSON\"}");
+    return;
+  }
+
+  const char* device = doc["device"];
+  const char* state  = doc["state"];
+
+  if (!device || !state) {
+    cmdServer.send(400, "application/json", "{\"error\":\"Missing device or state\"}");
+    return;
+  }
+
+  bool isOn = String(state) == "ON";
+
+  if (String(device) == "ALARM") {
+    digitalWrite(RELAY_ALARM_PIN, isOn ? HIGH : LOW);
+    Serial.printf(" ALARM relay -> %s\n", state);
+  } else if (String(device) == "BRAKE") {
+    digitalWrite(RELAY_BRAKE_PIN, isOn ? HIGH : LOW);
+    Serial.printf(" BRAKE relay -> %s\n", state);
+  } else {
+    cmdServer.send(400, "application/json", "{\"error\":\"Unknown device\"}");
+    return;
+  }
+
+  cmdServer.send(200, "application/json", "{\"status\":\"OK\"}");
+}
+
+// ======================
 // SETUP
 // ======================
 void setup() {
   Serial.begin(115200);
+
+  // Relay outputs
+  pinMode(RELAY_ALARM_PIN, OUTPUT);
+  pinMode(RELAY_BRAKE_PIN, OUTPUT);
+  digitalWrite(RELAY_ALARM_PIN, LOW);
+  digitalWrite(RELAY_BRAKE_PIN, LOW);
 
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
@@ -79,7 +139,14 @@ void setup() {
     Serial.print(".");
   }
 
-  Serial.println("\n✅ WiFi Connected!");
+  Serial.println("\n WiFi Connected!");
+  Serial.print(" ESP32 IP: ");
+  Serial.println(WiFi.localIP());
+
+  // Start command server
+  cmdServer.on("/command", HTTP_POST, handleCommand);
+  cmdServer.begin();
+  Serial.println(" Command server running on port 80");
 
   Wire.begin(21, 22);
 
@@ -89,13 +156,15 @@ void setup() {
   ads1.setGain(GAIN_ONE);
   ads2.setGain(GAIN_ONE);
 
-  Serial.println("✅ 8-Sensor Real-Time RMS + Peak Engine Ready");
+  Serial.println(" 8-Sensor Real-Time RMS + Peak Engine Ready");
 }
 
 // ======================
 // LOOP
 // ======================
 void loop() {
+  cmdServer.handleClient(); // Handle incoming HTTP commands from app
+
   if (micros() - lastSampleMicros >= SAMPLE_PERIOD_US) {
     lastSampleMicros += SAMPLE_PERIOD_US;
 
@@ -139,7 +208,7 @@ void updateMiddleLogic(int currentSensor) {
     return;
   }
 
-  // ✅ NEW RULE: If already approaching and middle sensor hits → OCCUPIED
+  //  NEW RULE: If already approaching and middle sensor hits → OCCUPIED
   if (currentMiddleState == MIDDLE_APPROACHING &&
       (currentSensor == 4 || currentSensor == 5)) {
 
@@ -147,11 +216,11 @@ void updateMiddleLogic(int currentSensor) {
       exitDirection = NONE;
       maxExitIndex = 0;
       lastTriggeredSensor = currentSensor;
-      return;  // ✅ Stop further processing immediately
+      return;  //  Stop further processing immediately
   }
 
   // ======================
-  // ✅ 1. DETECT MIDDLE ENTRY
+  //  1. DETECT MIDDLE ENTRY
   // ======================
   if ((lastTriggeredSensor == 4 && currentSensor == 5) ||
       (lastTriggeredSensor == 5 && currentSensor == 4)) {
@@ -161,7 +230,7 @@ void updateMiddleLogic(int currentSensor) {
   }
 
   // ======================
-  // ✅ 2. EXIT LOGIC (WITH JITTER)
+  //  2. EXIT LOGIC (WITH JITTER)
   // ======================
   if (currentMiddleState == MIDDLE_OCCUPIED) {
 
@@ -204,11 +273,11 @@ void updateMiddleLogic(int currentSensor) {
     }
 
     lastTriggeredSensor = currentSensor;
-    return;  // ✅ OCCUPIED always has priority
+    return;  //  OCCUPIED always has priority
   }
 
   // ======================
-  // ✅ 3. APPROACH DETECTION
+  //  3. APPROACH DETECTION
   // ======================
 
   int distanceToMiddleLeft  = (currentSensor <= 4) ? (5 - currentSensor) : 99;
@@ -250,15 +319,16 @@ void sendStateToServer() {
       stateStr = "APPROACHING";
 
     String payload = "{";
+    payload += "\"device_code\": \"" + String(DEVICE_CODE) + "\",";
     payload += "\"state\": \"" + stateStr + "\"";
     payload += "}";
 
     int httpResponseCode = http.POST(payload);
 
     if (httpResponseCode > 0) {
-      Serial.println("✅ State sent: " + stateStr);
+      Serial.println(" State sent: " + stateStr);
     } else {
-      Serial.println("❌ Failed to send state");
+      Serial.println(" Failed to send state");
     }
 
     http.end();
@@ -275,9 +345,9 @@ void computeVibration() {
 
   const float ALPHA = 0.2;
 
-  const float PEAK_THRESHOLD  = 2.0;  // ✅ Trigger level
-  const float RESET_THRESHOLD = 1.0;  // ✅ Must fall below this to re-arm
-  const unsigned long ALERT_COOLDOWN = 1000; // ✅ 1 second minimum between alerts
+  const float PEAK_THRESHOLD  = 2.0;  //  Trigger level
+  const float RESET_THRESHOLD = 1.0;  //  Must fall below this to re-arm
+  const unsigned long ALERT_COOLDOWN = 1000; //  1 second minimum between alerts
 
   for (int s = 0; s < 8; s++) {
     float sumSq = 0;
@@ -299,11 +369,11 @@ void computeVibration() {
     rmsOut[s]  = (ALPHA * rmsRaw)  + ((1 - ALPHA) * rmsOut[s]);
     peakOut[s] = (ALPHA * peakRaw) + ((1 - ALPHA) * peakOut[s]);
 
-    // ✅ ✅ ✅ PROPER EDGE-TRIGGERED ALERT SYSTEM ✅ ✅ ✅
+    //  EDGE-TRIGGERED ALERT SYSTEM 
 
     unsigned long now = millis();
 
-    // ✅ SEND ONLY ONCE PER EVENT
+    // SEND ONLY ONCE PER EVENT
     if (peakOut[s] > PEAK_THRESHOLD &&
         alertArmed[s] == true &&
         now - lastAlertTime[s] > ALERT_COOLDOWN) {
@@ -311,13 +381,13 @@ void computeVibration() {
       updateMiddleLogic(s + 1);
       sendStateToServer();
 
-      alertArmed[s] = false;      // 🔒 Lock until vibration ends
-      lastAlertTime[s] = now;    // 🕒 Store time
+      alertArmed[s] = false;      //  Lock until vibration ends
+      lastAlertTime[s] = now;    //  Store time
     }
 
-    // ✅ RESET ONLY AFTER VIBRATION FALLS BACK DOWN
+    // RESET ONLY AFTER VIBRATION FALLS BACK DOWN
     if (peakOut[s] < RESET_THRESHOLD) {
-      alertArmed[s] = true;      // 🔓 Re-arm for next event
+      alertArmed[s] = true;      //  Re-arm for next event
     }
   }
 
