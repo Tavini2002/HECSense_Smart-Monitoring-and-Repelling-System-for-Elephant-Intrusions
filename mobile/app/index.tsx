@@ -25,6 +25,21 @@ export default function LoginScreen() {
         }
         setLoading(true);
         try {
+            // ── Try admin login first ──
+            const adminRes = await fetch(`${API_BASE}/data/admin/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: trainName, password }),
+            });
+
+            if (adminRes.ok) {
+                const adminData = await adminRes.json();
+                await SecureStore.setItemAsync("adminToken", adminData.token);
+                router.replace("/admin");
+                return;
+            }
+
+            // ── Fall through to train login ──
             const res = await fetch(`${API_BASE}/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -32,7 +47,6 @@ export default function LoginScreen() {
             });
 
             const data = await res.json();
-
             if (!res.ok) {
                 Alert.alert("Login Failed", data.message || "Invalid credentials");
                 return;
@@ -40,22 +54,23 @@ export default function LoginScreen() {
 
             await SecureStore.setItemAsync("token", data.token);
             router.replace("/dashboard");
-        } catch (err) {
+        } catch {
             Alert.alert("Error", "Cannot connect to server. Check your network.");
         } finally {
             setLoading(false);
         }
     };
-
     return (
         <View style={styles.container}>
             <View style={styles.card}>
-                <Text style={styles.title}>SEIDS</Text>
-                <Text style={styles.subtitle}>Train Safety System</Text>
+                <View>
+                    <Text style={styles.title}>SEIDS</Text>
+                    <Text style={styles.subtitle}>Train Safety System</Text>
+                </View>
 
                 <TextInput
                     style={styles.input}
-                    placeholder="Train Name"
+                    placeholder="Name"
                     placeholderTextColor="#888"
                     value={trainName}
                     onChangeText={setTrainName}
@@ -77,6 +92,8 @@ export default function LoginScreen() {
                         <Text style={styles.loginBtnText}>LOGIN</Text>
                     )}
                 </TouchableOpacity>
+
+
             </View>
         </View>
     );
@@ -137,4 +154,31 @@ const styles = StyleSheet.create({
         fontSize: 16,
         letterSpacing: 2,
     },
+    adminBtn: {
+        marginTop: 20,
+        borderWidth: 1,
+        borderColor: "#58a6ff",
+        borderRadius: 8,
+        paddingVertical: 10,
+        alignItems: "center",
+    },
+    adminBtnText: {
+        color: "#58a6ff",
+        fontSize: 14,
+        letterSpacing: 1,
+    },
+    simulatorBtn: {
+        marginTop: 16,
+        backgroundColor: "#2d333b",
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#444c56",
+    },
+    simulatorBtnText: {
+        color: "#adbac7",
+        fontSize: 14,
+        fontWeight: "bold",
+    }
 });

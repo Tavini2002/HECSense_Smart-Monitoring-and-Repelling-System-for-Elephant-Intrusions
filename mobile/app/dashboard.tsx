@@ -9,10 +9,12 @@ import {
     Alert,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import Svg, { Circle } from "react-native-svg";
 import * as Location from "expo-location";
 import * as SecureStore from "expo-secure-store";
 import { useRouter } from "expo-router";
-import { API_BASE, ESP32_IP } from "../constants/api";
+import { Ionicons } from "@expo/vector-icons";
+import { API_BASE } from "../constants/api";
 
 // Status code to label mapping
 const STATUS_LABEL: Record<number, string> = {
@@ -43,6 +45,31 @@ function haversine(lat1: number, lon1: number, lat2: number, lon2: number): numb
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+
+// Google Maps dark style
+const DARK_MAP_STYLE = [
+    { elementType: "geometry", stylers: [{ color: "#212121" }] },
+    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+    { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#757575" }] },
+    { featureType: "administrative.country", elementType: "labels.text.fill", stylers: [{ color: "#9e9e9e" }] },
+    { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#bdbdbd" }] },
+    { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+    { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#181818" }] },
+    { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+    { featureType: "poi.park", elementType: "labels.text.stroke", stylers: [{ color: "#1b1b1b" }] },
+    { featureType: "road", elementType: "geometry.fill", stylers: [{ color: "#2c2c2c" }] },
+    { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#8a8a8a" }] },
+    { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#373737" }] },
+    { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#3c3c3c" }] },
+    { featureType: "road.highway.controlled_access", elementType: "geometry", stylers: [{ color: "#4e4e4e" }] },
+    { featureType: "road.local", elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+    { featureType: "transit", elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#000000" }] },
+    { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#3d3d3d" }] },
+];
+
 export default function DashboardScreen() {
     const router = useRouter();
 
@@ -54,15 +81,31 @@ export default function DashboardScreen() {
     } | null>(null);
     const [locationError, setLocationError] = useState<string | null>(null);
     const mapRef = useRef<MapView>(null);
+    const [headerTapCount, setHeaderTapCount] = useState(0);
 
     // Zones & distance
     const [allZones, setAllZones] = useState<ZoneStatus[]>([]);
     const [closestZone, setClosestZone] = useState<{ zone: ZoneStatus; distance: string } | null>(null);
+    const [closestZoneCode, setClosestZoneCode] = useState<string | null>(null); // only updates on actual switch
+    const prevClosestZoneCodeRef = useRef<string | null>(null);
     const [notification, setNotification] = useState<ZoneStatus | null>(null);
+    const [notificationDistance, setNotificationDistance] = useState<number | null>(null);
+    const [notificationClearing, setNotificationClearing] = useState(false);
+
+    const alarmOverriddenRef = useRef(false);
+    const [alarmOverridden, setAlarmOverridden] = useState(false);
+    const lastAlarmCmdRef = useRef<"ON" | "OFF" | null>(null);
+    const lastBrakeCmdRef = useRef<"ON" | "OFF" | null>(null);
     const locationRef = useRef<{ lat: number; lon: number; accuracy: number } | null>(null);
+    const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Relay status
     const [relayStatus, setRelayStatus] = useState("");
+    const [darkMap, setDarkMap] = useState(false);
+
+    // Trajectory & Distance tracking
+    const referenceLocRef = useRef<{ lat: number; lon: number } | null>(null);
+    const zoneDistancesRef = useRef<{ [code: string]: number[] }>({});
 
     // Polling interval ref
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -94,6 +137,19 @@ export default function DashboardScreen() {
                     };
                     setLocation(newLoc);
                     locationRef.current = newLoc;
+
+                    // Initialize reference location if empty
+                    if (referenceLocRef.current) {
+                        const d = haversine(
+                            referenceLocRef.current.lat, referenceLocRef.current.lon,
+                            newLoc.lat, newLoc.lon
+                        );
+                        if (d > 0.05) { // 50 meters
+                            referenceLocRef.current = { lat: newLoc.lat, lon: newLoc.lon };
+                        }
+                    } else {
+                        referenceLocRef.current = { lat: newLoc.lat, lon: newLoc.lon };
+                    }
                 }
             );
         })();
@@ -112,36 +168,129 @@ export default function DashboardScreen() {
             if (!res.ok) return;
             const zones: ZoneStatus[] = await res.json();
             setAllZones(zones);
-
-            // Trigger notification if any zone is NOT safe
-            const danger = zones.find(z => z.status !== 0);
-            if (danger) setNotification(danger);
-
-            // Find closest zone with GPS coordinates
-            const current = locationRef.current;
-            if (current) {
-                let minDist = Infinity;
-                let nearest: { zone: ZoneStatus; distance: string } | null = null;
-
-                for (const z of zones) {
-                    if (z.latitude == null || z.longitude == null) continue;
-                    const lat = parseFloat(z.latitude as any);
-                    const lon = parseFloat(z.longitude as any);
-                    const d = haversine(current.lat, current.lon, lat, lon);
-                    if (d < minDist) {
-                        minDist = d;
-                        const label = d < 1
-                            ? `${Math.round(d * 1000)} m`
-                            : `${d.toFixed(2)} km`;
-                        nearest = { zone: z, distance: label };
-                    }
-                }
-                setClosestZone(nearest);
-            }
         } catch (_) {
             // silent fail
         }
     };
+
+    // ─────────────────────────────
+    // REAL-TIME DISTANCE & ALARM LOGIC
+    // ─────────────────────────────
+    useEffect(() => {
+        if (!location || allZones.length === 0) return;
+
+        const current = location;
+        type NearestType = { zone: ZoneStatus; distKm: number; label: string } | null;
+        let approachingNearest: NearestType = null;
+        let absoluteNearest: NearestType = null;
+        let previousNearest: NearestType = null;
+
+        let minApproachingDist = Infinity;
+        let minAbsDist = Infinity;
+
+        for (const z of allZones) {
+            if (z.latitude == null || z.longitude == null || !z.device_code) continue;
+            const lat = parseFloat(z.latitude as any);
+            const lon = parseFloat(z.longitude as any);
+            const d = haversine(current.lat, current.lon, lat, lon);
+
+            const label = d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(2)} km`;
+            const zoneData = { zone: z, distKm: d, label };
+
+            if (z.device_code === prevClosestZoneCodeRef.current) {
+                previousNearest = zoneData;
+            }
+
+            // 1. Maintain distance history buffer (max 3 ticks)
+            if (!zoneDistancesRef.current[z.device_code]) {
+                zoneDistancesRef.current[z.device_code] = [];
+            }
+            const history = zoneDistancesRef.current[z.device_code];
+            history.push(d);
+            if (history.length > 3) history.shift();
+
+            // 2. Track absolute closest (fallback/global nearest)
+            if (d < minAbsDist) {
+                minAbsDist = d;
+                absoluteNearest = zoneData;
+            }
+
+            // 3. Determine if actively approaching
+            if (history.length >= 2) {
+                // difference from oldest recorded point to current
+                const delta = history[0] - d;
+                // if delta is positive, distance is shrinking -> we are approaching
+                // require at least 5 meters of movement to filter GPS noise/drift
+                if (delta > 0.005) {
+                    if (d < minApproachingDist) {
+                        minApproachingDist = d;
+                        approachingNearest = zoneData;
+                    }
+                }
+            }
+        }
+
+        // Use approaching nearest if valid, otherwise fallback to the previously selected one (prevents flipping when stationary)
+        // If all else fails (e.g. startup), use absolute nearest.
+        const nearest = approachingNearest || previousNearest || absoluteNearest;
+
+        if (nearest) {
+            setClosestZone({ zone: nearest.zone, distance: nearest.label });
+            // Only update closestZoneCode state if it actually changed — avoids map re-render every poll
+            const newCode = nearest.zone.device_code ?? null;
+            if (newCode !== prevClosestZoneCodeRef.current) {
+                prevClosestZoneCodeRef.current = newCode;
+                setClosestZoneCode(newCode);
+            }
+
+            if (nearest.zone.status !== 0 && nearest.distKm <= 5) {
+                // Closest zone is UNSAFE
+                if (clearTimerRef.current) { clearTimeout(clearTimerRef.current); clearTimerRef.current = null; }
+                setNotificationClearing(false);
+                setNotification(nearest.zone);
+                setNotificationDistance(nearest.distKm);
+
+                if (!alarmOverriddenRef.current && lastAlarmCmdRef.current !== "ON") {
+                    sendCommand("ALARM", "ON");
+                    lastAlarmCmdRef.current = "ON";
+                }
+
+                // Automatic Brake at 2km if NOT acknowledged
+                if (nearest.distKm <= 2 && !alarmOverriddenRef.current && lastBrakeCmdRef.current !== "ON") {
+                    sendCommand("BRAKE", "ON");
+                    lastBrakeCmdRef.current = "ON";
+                }
+            } else {
+                // Closest zone is SAFE — transition notification to safe then auto-close
+                if (alarmOverriddenRef.current) {
+                    alarmOverriddenRef.current = false;
+                    setAlarmOverridden(false);
+                }
+
+                setNotification(prev => {
+                    if (prev && !notificationClearing) {
+                        setNotificationClearing(true);
+                        if (lastAlarmCmdRef.current !== "OFF") {
+                            sendCommand("ALARM", "OFF");
+                            lastAlarmCmdRef.current = "OFF";
+                        }
+                        if (lastBrakeCmdRef.current !== "OFF") {
+                            sendCommand("BRAKE", "OFF");
+                            lastBrakeCmdRef.current = "OFF";
+                        }
+                        clearTimerRef.current = setTimeout(() => {
+                            setNotification(null);
+                            setNotificationClearing(false);
+                            clearTimerRef.current = null;
+                            lastAlarmCmdRef.current = null;
+                            lastBrakeCmdRef.current = null;
+                        }, 5000);
+                    }
+                    return prev;
+                });
+            }
+        }
+    }, [location, allZones]);
 
     useEffect(() => {
         fetchAllZones();
@@ -152,32 +301,43 @@ export default function DashboardScreen() {
     }, []);
 
     // ─────────────────────────────
-    // RELAY COMMANDS (direct to ESP32)
+    // RELAY COMMANDS
     // ─────────────────────────────
     const sendCommand = async (device: "ALARM" | "BRAKE", state: "ON" | "OFF") => {
-        setRelayStatus(`Sending ${device} ${state}...`);
         try {
-            const res = await fetch(`${ESP32_IP}/command`, {
+            const token = await SecureStore.getItemAsync("token");
+            await fetch(`${API_BASE}/data/esp32/control`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
                 body: JSON.stringify({ device, state }),
             });
-            if (res.ok) {
-                setRelayStatus(`✅ ${device} ${state}`);
-            } else {
-                setRelayStatus(`❌ ESP32 returned ${res.status}`);
-            }
         } catch (_) {
-            setRelayStatus("❌ Could not reach ESP32");
+            // silently ignore relay errors
         }
     };
 
     // ─────────────────────────────
     // LOGOUT
     // ─────────────────────────────
-    const logout = async () => {
-        await SecureStore.deleteItemAsync("token");
-        router.replace("/");
+    const logout = () => {
+        Alert.alert(
+            "Logout",
+            "Are you sure you want to log out of SEIDS?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Logout",
+                    style: "destructive",
+                    onPress: async () => {
+                        await SecureStore.deleteItemAsync("token");
+                        router.replace("/");
+                    }
+                }
+            ]
+        );
     };
 
     // ─────────────────────────────
@@ -185,31 +345,108 @@ export default function DashboardScreen() {
     // ─────────────────────────────
     return (
         <View style={styles.container}>
-            {/* ── DANGER NOTIFICATION MODAL ── */}
+            {/* ── NOTIFICATION MODAL (danger → safe transition) ── */}
             <Modal visible={!!notification} transparent animationType="fade">
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalCard}>
-                        <Text style={styles.modalIcon}>⚠️</Text>
-                        <Text style={styles.modalTitle}>DANGER DETECTED</Text>
-                        <Text style={styles.modalZone}>{notification?.zone_name}</Text>
-                        <Text style={styles.modalStatus}>
-                            Status:{" "}
-                            <Text style={styles.modalStatusValue}>
-                                {STATUS_LABEL[notification?.status ?? 0]}
-                            </Text>
-                        </Text>
-                        <Text style={styles.modalTime}>
-                            Updated: {notification?.checked_at?.slice(0, 19).replace("T", " ")}
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.dismissBtn}
-                            onPress={() => setNotification(null)}
-                        >
-                            <Text style={styles.dismissBtnText}>DISMISS</Text>
-                        </TouchableOpacity>
+                    <View style={[
+                        styles.modalCard,
+                        notificationClearing && styles.modalCardSafe,
+                    ]}>
+                        {notificationClearing ? (
+                            /* ── SAFE MODE ── */
+                            <>
+                                <Text style={styles.modalTitleSafe}>✓ ZONE IS NOW SAFE</Text>
+                                <Text style={styles.modalZone}>{notification?.zone_name}</Text>
+                                <View style={styles.ringContainer}>
+                                    <Svg width={140} height={140} style={styles.svg}>
+                                        <Circle cx={70} cy={70} r={54} stroke="#238636" strokeWidth={10} fill="none" />
+                                    </Svg>
+                                    <View style={styles.ringCenter}>
+                                        <Text style={styles.ringDistValueSafe}>✓</Text>
+                                    </View>
+                                </View>
+                                <Text style={styles.modalStatusSafe}>Closing in 5 seconds...</Text>
+                            </>
+                        ) : (
+                            /* ── DANGER MODE ── */
+                            <>
+                                <Ionicons name="warning" size={48} color="#f85149" style={styles.modalIcon} />
+                                <Text style={styles.modalTitle}>DANGER DETECTED</Text>
+                                <Text style={styles.modalZone}>{notification?.zone_name}</Text>
+
+                                {/* Circular distance indicator */}
+                                {(() => {
+                                    const MAX_KM = 10;
+                                    const dist = notificationDistance ?? MAX_KM;
+                                    const clamped = Math.min(dist, MAX_KM);
+                                    const progress = 1 - clamped / MAX_KM;
+                                    const R = 54;
+                                    const circumference = 2 * Math.PI * R;
+                                    const strokeDash = circumference * progress;
+                                    return (
+                                        <View style={styles.ringContainer}>
+                                            <Svg width={140} height={140} style={styles.svg}>
+                                                <Circle cx={70} cy={70} r={R} stroke="#30363d" strokeWidth={10} fill="none" />
+                                                <Circle
+                                                    cx={70} cy={70} r={R}
+                                                    stroke="#da3633" strokeWidth={10} fill="none"
+                                                    strokeDasharray={`${strokeDash} ${circumference}`}
+                                                    strokeLinecap="round"
+                                                    rotation={-90} origin="70,70"
+                                                />
+                                            </Svg>
+                                            <View style={styles.ringCenter}>
+                                                <Text style={styles.ringDistValue}>
+                                                    {dist < 1 ? `${Math.round(dist * 1000)}` : dist.toFixed(2)}
+                                                </Text>
+                                                <Text style={styles.ringDistUnit}>
+                                                    {dist < 1 ? "m" : "km"}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    );
+                                })()}
+
+                                <Text style={styles.modalStatus}>
+                                    Status:{" "}
+                                    <Text style={styles.modalStatusValue}>
+                                        {STATUS_LABEL[notification?.status ?? 0]}
+                                    </Text>
+                                </Text>
+                                <Text style={styles.modalTime}>
+                                    {notification?.checked_at?.slice(0, 19).replace("T", " ")}
+                                </Text>
+                            </>
+                        )}
+
+                        {!notificationClearing ? (
+                            <TouchableOpacity
+                                style={[styles.dismissBtn, { backgroundColor: alarmOverridden ? "#6e7681" : "#da3633" }]}
+                                onPress={() => {
+                                    if (!alarmOverridden) {
+                                        alarmOverriddenRef.current = true;
+                                        setAlarmOverridden(true);
+
+                                        sendCommand("ALARM", "OFF");
+                                        lastAlarmCmdRef.current = "OFF";
+
+                                        if (lastBrakeCmdRef.current === "ON") {
+                                            sendCommand("BRAKE", "OFF");
+                                            lastBrakeCmdRef.current = "OFF";
+                                        }
+                                    }
+                                }}
+                                disabled={alarmOverridden}
+                            >
+                                <Text style={styles.dismissBtnText}>
+                                    {alarmOverridden ? "ALARM SILENCED" : "ACKNOWLEDGE & SILENCE"}
+                                </Text>
+                            </TouchableOpacity>
+                        ) : null}
                     </View>
                 </View>
             </Modal>
+
 
             {/* ── MAP (75%) ── */}
             <View style={styles.mapContainer}>
@@ -221,24 +458,24 @@ export default function DashboardScreen() {
                         initialRegion={{
                             latitude: location.lat,
                             longitude: location.lon,
-                            latitudeDelta: 0.003,
-                            longitudeDelta: 0.003,
+                            latitudeDelta: 0.09,
+                            longitudeDelta: 0.09,
                         }}
                         showsUserLocation={false}
                         showsMyLocationButton={false}
+                        customMapStyle={darkMap ? DARK_MAP_STYLE : []}
                     >
                         <Marker
                             coordinate={{ latitude: location.lat, longitude: location.lon }}
                             anchor={{ x: 0.5, y: 0.5 }}
                         >
-                            <View style={styles.markerOuter}>
-                                <View style={styles.markerInner} />
-                            </View>
+                            <View style={styles.markerOuter} />
                         </Marker>
 
                         {/* All zone markers */}
                         {allZones.map((z) => {
                             if (z.latitude == null || z.longitude == null) return null;
+                            const isClosest = closestZoneCode === z.device_code;
                             return (
                                 <Marker
                                     key={z.device_code}
@@ -246,10 +483,20 @@ export default function DashboardScreen() {
                                         latitude: parseFloat(z.latitude as any),
                                         longitude: parseFloat(z.longitude as any),
                                     }}
-                                    title={z.zone_name}
-                                    description={`Status: ${STATUS_LABEL[z.status]}`}
-                                    pinColor={z.status === 0 ? "#238636" : z.status === 1 ? "#d29922" : "#da3633"}
-                                />
+                                    title={z.device_code}
+                                    description={isClosest ? "▶ Nearest zone" : z.zone_name}
+                                    anchor={{ x: 0.5, y: 0.5 }}
+                                >
+                                    {isClosest ? (
+                                        <View style={styles.zoneMarkerClosestOuter}>
+                                            <View style={styles.zoneMarkerClosestInner} />
+                                        </View>
+                                    ) : (
+                                        <View style={styles.zoneMarkerOuter}>
+                                            <View style={styles.zoneMarkerInner} />
+                                        </View>
+                                    )}
+                                </Marker>
                             );
                         })}
                     </MapView>
@@ -273,34 +520,56 @@ export default function DashboardScreen() {
                     </View>
                 )}
 
+                {/* Dark mode toggle */}
+                <TouchableOpacity
+                    style={[styles.mapIconBtn, { bottom: 64 }]}
+                    onPress={() => setDarkMap(d => !d)}
+                >
+                    <Ionicons name={darkMap ? "sunny" : "moon"} size={22} color="#8b949e" />
+                </TouchableOpacity>
+
                 {/* Recenter button */}
                 {location && (
                     <TouchableOpacity
-                        style={styles.recenterBtn}
+                        style={styles.mapIconBtn}
                         onPress={() =>
                             mapRef.current?.animateToRegion({
                                 latitude: location.lat,
                                 longitude: location.lon,
-                                latitudeDelta: 0.003,
-                                longitudeDelta: 0.003,
+                                latitudeDelta: 0.11,
+                                longitudeDelta: 0.11,
                             }, 600)
                         }
                     >
-                        <Text style={styles.recenterBtnText}>⊕</Text>
+                        <Ionicons name="locate" size={22} color="#8b949e" />
                     </TouchableOpacity>
                 )}
 
                 {/* Header bar on top of map */}
                 <View style={styles.headerBar}>
-                    <Text style={styles.headerText}>SEIDS</Text>
-                    {allZones.some(z => z.status !== 0) && (
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={() => {
+                            const next = headerTapCount + 1;
+                            if (next >= 7) {
+                                setHeaderTapCount(0);
+                                router.push("/simulator");
+                            } else {
+                                setHeaderTapCount(next);
+                            }
+                        }}
+                    >
+                        <Text style={styles.headerText}>SEIDS</Text>
+                    </TouchableOpacity>
+                    {closestZone && (
                         <View style={[
                             styles.statusBadge,
-                            allZones.some(z => z.status === 2) ? styles.badgeOccupied
-                                : styles.badgeApproaching,
+                            closestZone.zone.status === 2 ? styles.badgeOccupied
+                                : closestZone.zone.status === 1 ? styles.badgeApproaching
+                                    : styles.badgeSafe,
                         ]}>
                             <Text style={styles.statusBadgeText}>
-                                {allZones.some(z => z.status === 2) ? "OCCUPIED" : "APPROACHING"}
+                                {closestZone.zone.device_code}
                             </Text>
                         </View>
                     )}
@@ -309,57 +578,20 @@ export default function DashboardScreen() {
 
             {/* ── BOTTOM PANEL (25%) ── */}
             <View style={styles.bottomPanel}>
-                {/* Closest zone name + distance */}
-                <View style={styles.zoneRow}>
-                    <Text style={styles.zoneName}>
-                        {closestZone ? `Nearest: ${closestZone.zone.zone_name}` : "Connecting..."}
+                {/* Closest zone info centered */}
+                <View style={styles.zoneCenterContainer}>
+                    <Text style={styles.zoneNameCenter}>
+                        {closestZone ? `Nearest: ${closestZone.zone.zone_name}` : "Connecting to SEIDS..."}
                     </Text>
                     {closestZone && (
-                        <Text style={styles.zoneDistance}>📍 {closestZone.distance}</Text>
+                        <Text style={styles.zoneDistanceCenter}>{closestZone.distance}</Text>
                     )}
                 </View>
 
-                {/* Controls row */}
-                <View style={styles.controlsRow}>
-                    {/* ALARM */}
-                    <View style={styles.controlGroup}>
-                        <Text style={styles.controlLabel}>ALARM</Text>
-                        <View style={styles.btnRow}>
-                            <TouchableOpacity style={[styles.relayBtn, styles.btnOn]} onPress={() => sendCommand("ALARM", "ON")}>
-                                <Text style={styles.relayBtnText}>ON</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.relayBtn, styles.btnOff]} onPress={() => sendCommand("ALARM", "OFF")}>
-                                <Text style={styles.relayBtnText}>OFF</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    {/* Divider */}
-                    <View style={styles.divider} />
-
-                    {/* BRAKE */}
-                    <View style={styles.controlGroup}>
-                        <Text style={styles.controlLabel}>BRAKE</Text>
-                        <View style={styles.btnRow}>
-                            <TouchableOpacity style={[styles.relayBtn, styles.btnOn]} onPress={() => sendCommand("BRAKE", "ON")}>
-                                <Text style={styles.relayBtnText}>ON</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.relayBtn, styles.btnOff]} onPress={() => sendCommand("BRAKE", "OFF")}>
-                                <Text style={styles.relayBtnText}>OFF</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    {/* Divider */}
-                    <View style={styles.divider} />
-
-                    {/* Logout */}
-                    <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-                        <Text style={styles.logoutBtnText}>⏻</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {!!relayStatus && <Text style={styles.relayStatus}>{relayStatus}</Text>}
+                {/* Logout floating bottom right */}
+                <TouchableOpacity style={styles.logoutBtnFloating} onPress={logout}>
+                    <Ionicons name="power" size={24} color="#f85149" />
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -417,8 +649,8 @@ const styles = StyleSheet.create({
     mapOverlayText: { color: "#fff", fontSize: 12, fontWeight: "bold" },
     mapOverlayAccuracy: { color: "#8b949e", fontSize: 11 },
 
-    // Recenter button
-    recenterBtn: {
+    // Map icon buttons (recenter + dark mode toggle)
+    mapIconBtn: {
         position: "absolute",
         bottom: 12,
         right: 12,
@@ -431,30 +663,52 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
     },
-    recenterBtnText: {
-        color: "#58a6ff",
-        fontSize: 22,
-        lineHeight: 26,
-    },
 
-    // Custom marker
+    // Current location marker — single teal circle
     markerOuter: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: "#1a3a2a",
+        width: 18,
+        height: 18,
+        borderRadius: 9,
+        backgroundColor: "#1a56db",
+        elevation: 8,
+    },
+    markerInner: { width: 0, height: 0 }, // unused, kept to avoid missing-style errors
+
+    // Zone markers on map
+    zoneMarkerOuter: {
+        width: 18,
+        height: 18,
+        borderRadius: 9,
+        backgroundColor: "#ff0055ff",
         borderWidth: 2,
-        borderColor: "#39ff14",
+        borderColor: "#000000ff",
+        alignItems: "center",
+        justifyContent: "center",
+        elevation: 4,
+    },
+    zoneMarkerInner: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: "#000000ff",
+    },
+    // Closest zone — highlighted
+    zoneMarkerClosestOuter: {
+        width: 26,
+        height: 26,
+        borderRadius: 13,
+        backgroundColor: "#444444ff",
+        borderWidth: 2.5,
+        borderColor: "#d2ff58ff",
         alignItems: "center",
         justifyContent: "center",
         elevation: 8,
     },
-    markerInner: {
+    zoneMarkerClosestInner: {
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: "#39ff14",
-        elevation: 4,
+        backgroundColor: "#c2ce1dff",
     },
 
     // Status badge (on header bar)
@@ -474,83 +728,50 @@ const styles = StyleSheet.create({
         backgroundColor: "#161b22",
         borderTopWidth: 1,
         borderTopColor: "#30363d",
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        justifyContent: "space-around",
+        paddingHorizontal: 20,
+        paddingVertical: 20,
+        position: "relative",
     },
-    zoneName: {
-        color: "#8b949e",
-        fontSize: 12,
-        letterSpacing: 1,
-    },
-    zoneRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: 4,
-    },
-    zoneDistance: {
-        color: "#39ff14",
-        fontSize: 12,
-        fontWeight: "bold",
-        letterSpacing: 0.5,
-    },
-    controlsRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-    },
-    controlGroup: {
-        alignItems: "center",
+    zoneCenterContainer: {
         flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingBottom: 30, // nudges the text higher
     },
-    controlLabel: {
-        color: "#58a6ff",
-        fontSize: 11,
+    zoneNameCenter: {
+        color: "#8b949e",
+        fontSize: 16,
+        letterSpacing: 1,
+        marginBottom: 8,
+    },
+    zoneDistanceCenter: {
+        color: "#39ff14",
+        fontSize: 32,
         fontWeight: "bold",
-        marginBottom: 6,
         letterSpacing: 1,
     },
-    btnRow: { flexDirection: "row", gap: 6 },
-    divider: {
-        width: 1,
-        height: 48,
-        backgroundColor: "#30363d",
-        marginHorizontal: 4,
-    },
-    relayBtn: {
-        borderRadius: 6,
-        paddingHorizontal: 12,
-        paddingVertical: 7,
-    },
-    btnOn: { backgroundColor: "#238636" },
-    btnOff: { backgroundColor: "#6e7681" },
-    relayBtnText: { color: "#fff", fontWeight: "bold", fontSize: 12 },
-    relayStatus: { color: "#8b949e", fontSize: 11, marginTop: 4, textAlign: "center" },
-
-    // Logout (power icon)
-    logoutBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: "#f85149",
+    logoutBtnFloating: {
+        position: "absolute",
+        bottom: 50,
+        right: 20,
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: "rgba(248, 81, 73, 0.1)",
         alignItems: "center",
         justifyContent: "center",
-        marginHorizontal: 8,
     },
-    logoutBtnText: { color: "#f85149", fontSize: 18 },
 
     // Modal
     modalOverlay: {
         flex: 1,
-        backgroundColor: "rgba(0,0,0,0.85)",
+        backgroundColor: "rgba(0,0,0,0.5)",
         justifyContent: "center",
         alignItems: "center",
         padding: 24,
     },
     modalCard: {
-        backgroundColor: "#161b22",
+        backgroundColor: "rgba(22, 27, 34, 0.85)",
         borderRadius: 16,
         padding: 32,
         width: "100%",
@@ -559,15 +780,38 @@ const styles = StyleSheet.create({
         borderColor: "#da3633",
         alignItems: "center",
     },
-    modalIcon: { fontSize: 48, marginBottom: 12 },
+    modalIcon: { marginBottom: 12 },
     modalTitle: {
         color: "#f85149",
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: "bold",
         letterSpacing: 2,
-        marginBottom: 12,
+        marginBottom: 6,
     },
-    modalZone: { color: "#fff", fontSize: 16, marginBottom: 8 },
+    modalZone: { color: "#fff", fontSize: 15, marginBottom: 12 },
+    // Circular distance ring
+    ringContainer: {
+        width: 140,
+        height: 140,
+        alignItems: "center",
+        justifyContent: "center",
+        marginVertical: 12,
+    },
+    svg: { position: "absolute" },
+    ringCenter: {
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    ringDistValue: {
+        color: "#f85149",
+        fontSize: 30,
+        fontWeight: "bold",
+        lineHeight: 34,
+    },
+    ringDistUnit: {
+        color: "#8b949e",
+        fontSize: 13,
+    },
     modalStatus: { color: "#8b949e", fontSize: 15, marginBottom: 4 },
     modalStatusValue: { color: "#ffa657", fontWeight: "bold" },
     modalTime: { color: "#6e7681", fontSize: 13, marginBottom: 24 },
@@ -580,7 +824,27 @@ const styles = StyleSheet.create({
     dismissBtnText: {
         color: "#fff",
         fontWeight: "bold",
-        fontSize: 16,
-        letterSpacing: 2,
+        fontSize: 14,
+        letterSpacing: 1,
     },
+    // Safe-mode variants
+    modalCardSafe: { borderColor: "#238636" },
+    modalTitleSafe: {
+        color: "#3fb950",
+        fontSize: 20,
+        fontWeight: "bold",
+        letterSpacing: 2,
+        marginBottom: 6,
+    },
+    ringDistValueSafe: {
+        color: "#3fb950",
+        fontSize: 48,
+        fontWeight: "bold",
+    },
+    modalStatusSafe: {
+        color: "#8b949e",
+        fontSize: 13,
+        marginBottom: 20,
+    },
+    dismissBtnSafe: { backgroundColor: "#238636" },
 });
