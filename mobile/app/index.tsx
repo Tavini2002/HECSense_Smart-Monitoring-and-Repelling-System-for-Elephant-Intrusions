@@ -64,7 +64,7 @@ export default function LoginScreen() {
         <View style={styles.container}>
             <View style={styles.card}>
                 <View>
-                    <Text style={styles.title}>SEIDS</Text>
+                    <Text style={styles.title}>HECSense</Text>
                     <Text style={styles.subtitle}>Train Safety System</Text>
                 </View>
 

@@ -68,7 +68,7 @@ router.post("/esp32/control", (req, res) => {
   const trainState = getTrainState(payload.train_id);
   trainState[device] = state;
 
-  console.log(`[SEIDS] Train ${payload.train_id} (${payload.train_name}): ${device} → ${state}`);
+  console.log(`[HECSense] Train ${payload.train_id} (${payload.train_name}): ${device} → ${state}`);
 
   res.json({
     message: `${device} set to ${state} for Train ${payload.train_id}`,
